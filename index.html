@@ -101,7 +101,7 @@ nav a{display:block;padding:15px max(5vw,18px);text-decoration:none;text-transfo
 .lb-close{width:48px;height:48px;border:0;background:none;color:var(--sand);font-size:30px;cursor:pointer}
 .lb-track{flex:1;display:flex;overflow-x:auto;scroll-snap-type:x mandatory}
 .lb-track figure{flex:0 0 100%;margin:0;scroll-snap-align:center;display:grid;place-items:center;padding:8px}
-.lb-track img{max-height:calc(100dvh - 140px);width:auto;object-fit:contain}
+.lb-track img,.lb-track video{max-height:calc(100dvh - 140px);max-width:100%;width:auto;object-fit:contain}
 .lb-nav{display:flex;justify-content:center;gap:14px;padding:12px}
 .lb-nav button{width:48px;height:48px;border-radius:50%;border:1px solid var(--sand);background:none;color:var(--sand);font-size:22px;cursor:pointer}
 
@@ -131,7 +131,8 @@ nav a{display:block;padding:15px max(5vw,18px);text-decoration:none;text-transfo
 .step h3{font-size:26px;margin:2px 0 6px}
 .step p{font-size:14px;margin:0}
 .edit{display:grid;gap:12px;grid-template-columns:repeat(2,minmax(0,1fr))}
-.edit img{width:100%;aspect-ratio:4/5;object-fit:cover;cursor:zoom-in}
+.edit img,.edit video{width:100%;aspect-ratio:4/5;object-fit:cover;cursor:zoom-in;display:block;background:rgba(0,0,0,.15)}
+.btn.ghost.on-wine{border-color:var(--sand);color:var(--sand)}
 @media(min-width:760px){.edit{grid-template-columns:repeat(3,minmax(0,1fr))}}
 
 /* Split with image + form */
@@ -255,7 +256,7 @@ footer h2{font:400 clamp(22px,5vw,30px)/1.2 "Familjen Grotesk",sans-serif;letter
 <!-- HOME -->
 <section class="hero" id="home">
  <div class="hero-media">
-  <video autoplay muted loop playsinline preload="metadata"
+  <video id="heroVid" autoplay muted loop playsinline preload="auto"
    poster="https://static.wixstatic.com/media/27eccc_4ab3c0486c304af89ad15ff3aa7173d9f000.jpg/v1/fill/w_1000,h_800,al_c,q_80/hero.jpg"
    src="https://video.wixstatic.com/video/27eccc_4ab3c0486c304af89ad15ff3aa7173d9/720p/mp4/file.mp4"></video>
  </div>
@@ -345,6 +346,7 @@ footer h2{font:400 clamp(22px,5vw,30px)/1.2 "Familjen Grotesk",sans-serif;letter
    <h2 style="font-style:italic">The Wedding Edit</h2>
    <p class="sub"><em>A curated selection of our wedding and event creations, from understated elegance to statement designs.</em></p>
    <div class="edit" id="editGrid"></div>
+   <div class="more"><button class="btn ghost on-wine" type="button" id="editMore">Load more</button></div>
   </div>
  </div>
  <div class="band center">
@@ -498,7 +500,20 @@ footer h2{font:400 clamp(22px,5vw,30px)/1.2 "Familjen Grotesk",sans-serif;letter
  // Wix-hosted photo, resized. To host photos yourself, download them into a "photos" folder and change this function.
  const pic=(id,w=700,h=875)=>`https://static.wixstatic.com/media/${id}/v1/fill/w_${w},h_${h},al_c,q_80,enc_auto/photo.${id.split('.').pop()}`;
  const full=id=>`https://static.wixstatic.com/media/${id}/v1/fit/w_1400,h_1800,q_85,enc_auto/photo.${id.split('.').pop()}`;
+ // Videos: "v:<id>/<poster suffix>" -> autoplaying, muted, looping
+ const isV=s=>s.startsWith('v:');
+ const vidSrc=(s,q)=>`https://video.wixstatic.com/video/27eccc_${s.slice(2).split('/')[0]}/${q}/mp4/file.mp4`;
+ const vidPoster=(s,w,h)=>{const [id,suf]=s.slice(2).split('/');return pic(`27eccc_${id}${suf}.jpg`,w,h)};
+ const media=(s,w,h,alt,k,q='480p')=>isV(s)
+   ?`<video data-auto data-k="${k}" muted loop playsinline autoplay preload="none" poster="${vidPoster(s,w,h)}" src="${vidSrc(s,q)}" aria-label="${esc(alt)}"></video>`
+   :`<img src="${pic(s,w,h)}" data-k="${k}" alt="${esc(alt)}" loading="lazy">`;
+ // Play videos only while they're on screen (saves data and battery)
+ const vio=new IntersectionObserver(es=>es.forEach(e=>{const v=e.target;if(e.isIntersecting){v.muted=true;if(v.preload==='none')v.preload='auto';const p=v.play();p&&p.catch(()=>{})}else v.pause()}),{threshold:.2});
+ const watchVideos=root=>root.querySelectorAll('video[data-auto]:not([data-w])').forEach(v=>{v.dataset.w=1;vio.observe(v)});
  const P='27eccc_';
+
+ // Hero video
+ {const v=$('#heroVid');v.muted=true;const go=()=>{const p=v.play();p&&p.catch(()=>{})};go();document.addEventListener('touchstart',go,{once:true,passive:true});}
 
  // Menu
  const hdr=$('#top'),mb=$('#menuBtn');
@@ -529,8 +544,8 @@ footer h2{font:400 clamp(22px,5vw,30px)/1.2 "Familjen Grotesk",sans-serif;letter
 
  // Lightbox
  const lb=$('#lb'),track=$('#lbTrack');
- const openLB=(title,ids,start=0)=>{$('#lbTitle').textContent=title;track.innerHTML=ids.map(id=>`<figure><img src="${full(id)}" alt="${esc(title)}" loading="lazy"></figure>`).join('');lb.classList.add('on');document.body.style.overflow='hidden';requestAnimationFrame(()=>track.scrollTo({left:start*track.clientWidth}))};
- const closeLB=()=>{lb.classList.remove('on');document.body.style.overflow=''};
+ const openLB=(title,ids,start=0)=>{$('#lbTitle').textContent=title;track.innerHTML=ids.map(id=>`<figure>${isV(id)?`<video data-auto muted loop playsinline autoplay preload="none" poster="${vidPoster(id,900,1125)}" src="${vidSrc(id,'720p')}"></video>`:`<img src="${full(id)}" alt="${esc(title)}" loading="lazy">`}</figure>`).join('');watchVideos(track);lb.classList.add('on');document.body.style.overflow='hidden';requestAnimationFrame(()=>track.scrollTo({left:start*track.clientWidth}))};
+ const closeLB=()=>{track.querySelectorAll('video').forEach(v=>v.pause());lb.classList.remove('on');document.body.style.overflow=''};
  $('#lbClose').addEventListener('click',closeLB);
  $('#lbPrev').addEventListener('click',()=>track.scrollBy({left:-track.clientWidth,behavior:'smooth'}));
  $('#lbNext').addEventListener('click',()=>track.scrollBy({left:track.clientWidth,behavior:'smooth'}));
@@ -538,13 +553,13 @@ footer h2{font:400 clamp(22px,5vw,30px)/1.2 "Familjen Grotesk",sans-serif;letter
 
  // The Collection (cover photo + the photos on each collection page)
  const collections=[
-  ['Most Loved','799f6cedb7ea40e7889d41798571f582~mv2.jpg',['7ea02866616b4cffbb4e06286b3d9bd8~mv2.jpg','2da208153baa469eb940a4de32ce2fb8~mv2.jpg','d5b641ee342749b88f7546d40dc3a105~mv2.png','f6d1f71ed3ae45fcbec38e0e3ed19f19~mv2.jpg','8ba1cb80f2c64fd5bc79db865808d071~mv2.png','3413f5b8dc1c49e3b16b4d38d353d561~mv2.png','c60ace1b3e2b4be08c1b8aab6e4656ed~mv2.jpg','3d765ed318464d09bd0aa7d7cd1b3d20~mv2.jpg']],
-  ['Statement Slabs','60980b85ce15428d894141068a017d22~mv2.jpg',['a385d55d08bf4411a92ea0f5d3e6dc07~mv2.jpg','dbfabec1205c488e9677ea140dba06c0~mv2.png','f1b24f4dd4e04479bfd4d1a82867405d~mv2.jpg','e81efb87e20b45eab286ad0fe5b74778~mv2.jpg','58693acc88c948229eb7934b3dd4d57c~mv2.png','7405190dcea241688e91fe3662918851~mv2.png','7ed813a9412b4f159c5f7e78f5e71d12~mv2.jpg','063651bc0a1845f195e527da1b43cd65~mv2.jpg','48fe1250ce364862a41adb2f31d05050~mv2.png']],
-  ['Tiered Creations','844071ce74594978b2829dbe96752caa~mv2.jpg',['8ad319343c604cc796c7d45118a36f3a~mv2.jpg','1ab12a3a7dfd40d780b9d3a55af79f90~mv2.jpg','edf460d11f844583b3b285e04f3d377a~mv2.jpg','06588dd5ce1b4f609c9a58f47ddb511a~mv2.jpg','7e0296844bd142cfad2fa3f8019b1bfc~mv2.jpg','6d80b466859a4a94af6efa604f116aab~mv2.jpg','40ca9c83113e4581b07feff08cbb5899~mv2.jpg','c26c60676c8b402dbeb8b96c77fcbc22~mv2.jpg','9814dc8014124487a038d316bf28102e~mv2.jpg','fe98538f879b4c8193482a3d953b6542~mv2.jpg','bb3973b19c8141db92fc8c78b754b1e3~mv2.jpg','abd52bd1eac54f2395573a5322650629~mv2.jpg','8b52ee3075e64b01ac2c1272eb0de537~mv2.jpg']],
-  ['Star Creations','692eefb245d34ff88605c476906a8c15~mv2.jpg',['f6d1f71ed3ae45fcbec38e0e3ed19f19~mv2.jpg','2b7aaf7e4ee0493fb11c5183e2ba6152~mv2.jpg','4b11fa20ba494ba293778786b8c34b49~mv2.jpg','3f5d938e86524620bff18ed39f41f0cd~mv2.jpg']],
-  ['Vintage Collection','f70f550156d14ee481c3324e48f4887b~mv2.jpg',['e9aac720aeb344a09c4fc5a1c0954c35~mv2.jpg','f6c80213f0c846f18acd87b75decd9b4~mv2.jpg','39ba99f8abbb434abc3005d619a057b4~mv2.png','811de5acbc23406bb0bdfa2f05cf8743~mv2.jpg','1241ccbcb4224a329a3e1e67324e5c38~mv2.jpg','dde807f81df04e29b8a12f4925a3a6d0~mv2.jpg','99f4e91fc585465a8e02254daefab71a~mv2.jpg','37e3c6f027f843ad9a945788a68ad8be~mv2.jpg','e1110176f86c42f3aa3c5a53b35a1e9f~mv2.jpg','1f3cc8c14ad64fec906adfac87e0ba92~mv2.jpg','111b1bd552544c4895714ef873fe4ba4~mv2.jpg','f44355f3080e4be98c25633140686dec~mv2.jpg','e13cdcc8c6df4e7cadd9ffc813dab1b0~mv2.jpg','02341958133f4196b5f976f1785d5978~mv2.jpg','4adea714e0f3495fa6e65bfe5fd707d0~mv2.jpg','9479af1525e14a08b0277dfb61911f64~mv2.png']],
-  ['Dagger Collection','da9219022bb14f1f85818fc96bfd9174~mv2.jpg',['d0aaf108acba462eb3635bbab0c44665~mv2.jpg','2da208153baa469eb940a4de32ce2fb8~mv2.jpg','d5b641ee342749b88f7546d40dc3a105~mv2.png','3413f5b8dc1c49e3b16b4d38d353d561~mv2.png','5bb242f35acb4b4e81a1e62e1258aeeb~mv2.jpg','d4a5c3507dd54857b6fd592ebf87cbb9~mv2.jpg']]
- ].map(c=>[c[0],P+c[1],c[2].map(x=>P+x)]);
+  ['Most Loved','799f6cedb7ea40e7889d41798571f582~mv2.jpg',['7ea02866616b4cffbb4e06286b3d9bd8~mv2.jpg','2da208153baa469eb940a4de32ce2fb8~mv2.jpg','d5b641ee342749b88f7546d40dc3a105~mv2.png','f6d1f71ed3ae45fcbec38e0e3ed19f19~mv2.jpg','8ba1cb80f2c64fd5bc79db865808d071~mv2.png','3413f5b8dc1c49e3b16b4d38d353d561~mv2.png','c60ace1b3e2b4be08c1b8aab6e4656ed~mv2.jpg','3d765ed318464d09bd0aa7d7cd1b3d20~mv2.jpg','v:331e1f9c9d4040ad809e4dfe27c37291/f000','v:27df3c7e56214e7aacfdd66f492476d3/f000','v:8104056234034a84bb05a867c5ad24df/f000']],
+  ['Statement Slabs','60980b85ce15428d894141068a017d22~mv2.jpg',['a385d55d08bf4411a92ea0f5d3e6dc07~mv2.jpg','dbfabec1205c488e9677ea140dba06c0~mv2.png','f1b24f4dd4e04479bfd4d1a82867405d~mv2.jpg','e81efb87e20b45eab286ad0fe5b74778~mv2.jpg','58693acc88c948229eb7934b3dd4d57c~mv2.png','7405190dcea241688e91fe3662918851~mv2.png','7ed813a9412b4f159c5f7e78f5e71d12~mv2.jpg','063651bc0a1845f195e527da1b43cd65~mv2.jpg','48fe1250ce364862a41adb2f31d05050~mv2.png','v:96187d912e6c43f7873f5aaa991e3ef6/f000','v:4ab3c0486c304af89ad15ff3aa7173d9/f000']],
+  ['Tiered Creations','844071ce74594978b2829dbe96752caa~mv2.jpg',['8ad319343c604cc796c7d45118a36f3a~mv2.jpg','1ab12a3a7dfd40d780b9d3a55af79f90~mv2.jpg','edf460d11f844583b3b285e04f3d377a~mv2.jpg','06588dd5ce1b4f609c9a58f47ddb511a~mv2.jpg','7e0296844bd142cfad2fa3f8019b1bfc~mv2.jpg','6d80b466859a4a94af6efa604f116aab~mv2.jpg','40ca9c83113e4581b07feff08cbb5899~mv2.jpg','c26c60676c8b402dbeb8b96c77fcbc22~mv2.jpg','9814dc8014124487a038d316bf28102e~mv2.jpg','fe98538f879b4c8193482a3d953b6542~mv2.jpg','bb3973b19c8141db92fc8c78b754b1e3~mv2.jpg','abd52bd1eac54f2395573a5322650629~mv2.jpg','8b52ee3075e64b01ac2c1272eb0de537~mv2.jpg','v:11d0baa3344b4429ab378923cf7b0953/f000','v:b08b6a33f1ee4c18ac37538121f186a5/f000','v:bb7c2b8bcda34c42ad1019556e8842b9/f000','v:fc5a0bb9850c49c28a4fbf64953433ac/f000']],
+  ['Star Creations','692eefb245d34ff88605c476906a8c15~mv2.jpg',['f6d1f71ed3ae45fcbec38e0e3ed19f19~mv2.jpg','2b7aaf7e4ee0493fb11c5183e2ba6152~mv2.jpg','4b11fa20ba494ba293778786b8c34b49~mv2.jpg','3f5d938e86524620bff18ed39f41f0cd~mv2.jpg','v:e857eb2e104f452996bec1c340a78996/f000']],
+  ['Vintage Collection','f70f550156d14ee481c3324e48f4887b~mv2.jpg',['e9aac720aeb344a09c4fc5a1c0954c35~mv2.jpg','f6c80213f0c846f18acd87b75decd9b4~mv2.jpg','39ba99f8abbb434abc3005d619a057b4~mv2.png','811de5acbc23406bb0bdfa2f05cf8743~mv2.jpg','1241ccbcb4224a329a3e1e67324e5c38~mv2.jpg','dde807f81df04e29b8a12f4925a3a6d0~mv2.jpg','99f4e91fc585465a8e02254daefab71a~mv2.jpg','37e3c6f027f843ad9a945788a68ad8be~mv2.jpg','e1110176f86c42f3aa3c5a53b35a1e9f~mv2.jpg','1f3cc8c14ad64fec906adfac87e0ba92~mv2.jpg','111b1bd552544c4895714ef873fe4ba4~mv2.jpg','f44355f3080e4be98c25633140686dec~mv2.jpg','e13cdcc8c6df4e7cadd9ffc813dab1b0~mv2.jpg','02341958133f4196b5f976f1785d5978~mv2.jpg','4adea714e0f3495fa6e65bfe5fd707d0~mv2.jpg','9479af1525e14a08b0277dfb61911f64~mv2.png','v:4fe8c4ad7b274f548f86b8c3767ad32a/f000']],
+  ['Dagger Collection','da9219022bb14f1f85818fc96bfd9174~mv2.jpg',['d0aaf108acba462eb3635bbab0c44665~mv2.jpg','2da208153baa469eb940a4de32ce2fb8~mv2.jpg','d5b641ee342749b88f7546d40dc3a105~mv2.png','3413f5b8dc1c49e3b16b4d38d353d561~mv2.png','5bb242f35acb4b4e81a1e62e1258aeeb~mv2.jpg','d4a5c3507dd54857b6fd592ebf87cbb9~mv2.jpg','v:309d3dd3fc2445eea31f6914d0ca86f0/f000','v:640a29912a2241cc8335527286ee2881/f000']]
+ ].map(c=>[c[0],P+c[1],c[2].map(x=>isV(x)?x:P+x)]);
  $('#colGrid').innerHTML=collections.map((c,i)=>`<button class="tile" type="button" data-i="${i}"><img src="${pic(c[1])}" alt="${esc(c[0])}" loading="lazy"><span>${esc(c[0])}</span></button>`).join('');
  $('#colGrid').addEventListener('click',e=>{const t=e.target.closest('.tile');if(t){const c=collections[t.dataset.i];openLB(c[0],c[2])}});
 
@@ -559,9 +574,11 @@ footer h2{font:400 clamp(22px,5vw,30px)/1.2 "Familjen Grotesk",sans-serif;letter
  $('#flavImgs').innerHTML=['3ce96d0e83664e499203ed3bf484532e~mv2.jpg','aeced39249f347f0907b2a2543a9fa52~mv2.jpg','3dee6872a2394bd986321e0f4ea77efd~mv2.jpg'].map(x=>`<img src="${pic(P+x,360,360)}" alt="Cake layers" loading="lazy">`).join('');
 
  // The Wedding Edit
- const edit=['1322329cc99a47458e1674fa8453c6a2~mv2.jpg','1c8be786c6ef4eaba7c541e707006b16~mv2.jpg','47da4361a12a467aad0b326836a7427b~mv2.jpg','c6294ccedba94be1be6a86fe95064b01~mv2.jpg','527a9b485cdd4aae84f798255c262f11~mv2.jpg','6b255b276e544801bf9a4ed441068eb3~mv2.png'].map(x=>P+x);
- $('#editGrid').innerHTML=edit.map((id,k)=>`<img src="${pic(id)}" data-k="${k}" alt="Wedding and event cake" loading="lazy">`).join('');
- $('#editGrid').addEventListener('click',e=>{const im=e.target.closest('img');if(im)openLB('The Wedding Edit',edit,+im.dataset.k)});
+ const edit=[P+'1322329cc99a47458e1674fa8453c6a2~mv2.jpg',P+'1c8be786c6ef4eaba7c541e707006b16~mv2.jpg','v:e1ada623cabc4caaa9c3a0815d001adb/f003','v:441629e2c26a4e0f97ae40b812da4ad3/f003','v:da4df88e0d34401f8f136b62331a97e4/f003',P+'47da4361a12a467aad0b326836a7427b~mv2.jpg','v:f49dc3d6d9774c3ea6369f89c3baee33/f003','v:0ea3055ddb8d4cedb6484a51fb318909/f003',P+'c6294ccedba94be1be6a86fe95064b01~mv2.jpg','v:2a1a707d67364f40a0e193cc1411a519/f003','v:e964279db85e4f1fb13613c921143985/f003','v:71a62eb90d4b47948dd830362200306a/f003','v:b9f007aec85c4b80879458224baae25f/f003','v:90cd2b9dabe04cda9f478d65a3df9b90/f003',P+'527a9b485cdd4aae84f798255c262f11~mv2.jpg','v:a5d8a1ad89594ae881b1c2877699ad92/f003','v:ef3aefb5542e485e971a1002b9a8d55d/f003'];
+ let eShown=0;const eg=$('#editGrid'),eMore=$('#editMore');
+ const addEdit=()=>{const n=edit.slice(eShown,eShown+6);eg.insertAdjacentHTML('beforeend',n.map((id,k)=>media(id,600,750,'Wedding and event cake',eShown+k)).join(''));eShown+=n.length;watchVideos(eg);if(eShown>=edit.length)eMore.hidden=true};
+ addEdit();eMore.addEventListener('click',addEdit);
+ eg.addEventListener('click',e=>{const m=e.target.closest('[data-k]');if(m)openLB('The Wedding Edit',edit,+m.dataset.k)});
 
  // Tasting box flavours
  const slices=[
