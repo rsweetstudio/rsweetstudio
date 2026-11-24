@@ -1,0 +1,656 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>R Sweet Studio</title>
+<meta name="description" content="R Sweet Studio — Desserts made personal. Details made unforgettable. Custom cakes in Ottawa, ON.">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,400;0,500;1,400;1,500&family=Familjen+Grotesk:wght@400;500&family=Nunito+Sans:wght@300;400&display=swap" rel="stylesheet">
+<style>
+/* Colours and fonts taken from rsweetstudio.com:
+   wine #652031, sand #E7DFD4, cream #FAF7F2.
+   Headings: Ogg on the current site -> Cormorant Garamond (closest free match).
+   Body: Avenir Light -> Nunito Sans Light. Labels: Familjen Grotesk (same as current site). */
+:root{color-scheme:light;--wine:#652031;--sand:#E7DFD4;--cream:#FAF7F2;--line:rgba(101,32,49,.35)}
+*{box-sizing:border-box;min-width:0}
+html{scroll-behavior:smooth;scroll-padding-top:70px;-webkit-text-size-adjust:100%}
+body{margin:0;background:var(--sand);color:var(--wine);font:300 16px/1.6 "Nunito Sans",Avenir,"Avenir Next",system-ui,sans-serif;overflow-x:clip}
+img,video{display:block;max-width:100%}
+a{color:inherit}
+h1,h2,h3{font-family:"Cormorant Garamond",Georgia,serif;font-weight:400;line-height:1.05;margin:0 0 .35em;text-wrap:balance}
+h2{font-size:clamp(34px,7vw,52px)}
+h3{font-size:clamp(24px,5vw,30px)}
+em{font-style:italic}
+p{margin:0 0 1em}
+.eyebrow{font:500 12px "Familjen Grotesk",sans-serif;letter-spacing:.35em;text-transform:uppercase;margin:0 0 10px}
+.sub{font-size:15px;max-width:60ch}
+.center{text-align:center}.center .sub{margin-inline:auto}
+.wrap{max-width:1180px;margin:0 auto}
+.band{padding:clamp(48px,8vw,96px) max(5vw,18px)}
+.band.wine{background:var(--wine);color:var(--sand)}
+.band.cream{background:var(--cream)}
+.rule{border:0;border-top:1px solid var(--line);margin:18px 0 28px}
+.btn{display:inline-flex;align-items:center;justify-content:center;gap:8px;min-height:48px;padding:0 24px;border:1px solid var(--wine);background:var(--wine);color:var(--sand);
+ font:400 14px "Nunito Sans",sans-serif;letter-spacing:.06em;text-transform:uppercase;text-decoration:none;cursor:pointer}
+.btn.ghost{background:transparent;color:var(--wine)}
+.btn.light{background:var(--sand);color:var(--wine);border-color:var(--sand)}
+.btn:hover{opacity:.88}
+:focus-visible{outline:2px solid currentColor;outline-offset:3px}
+
+/* Header */
+header{position:sticky;top:0;z-index:30;background:var(--wine);color:var(--sand)}
+.bar{display:flex;align-items:center;justify-content:space-between;gap:12px;height:64px;padding:0 max(4vw,14px);max-width:1280px;margin:0 auto}
+.logo img{height:48px;width:auto}
+.menu-btn{width:48px;height:48px;border:0;background:none;color:var(--sand);cursor:pointer;display:grid;place-items:center}
+.menu-btn span,.menu-btn span::before,.menu-btn span::after{content:"";display:block;width:24px;height:1.5px;background:currentColor;position:relative;transition:transform .25s}
+.menu-btn span::before{position:absolute;top:-7px}.menu-btn span::after{position:absolute;top:7px}
+.open .menu-btn span{background:transparent}.open .menu-btn span::before{transform:translateY(7px) rotate(45deg)}.open .menu-btn span::after{transform:translateY(-7px) rotate(-45deg)}
+nav{display:none}
+nav ul{list-style:none;margin:0;padding:0}
+nav a{display:block;padding:15px max(5vw,18px);text-decoration:none;text-transform:uppercase;font-size:15px;letter-spacing:.04em;border-top:1px solid rgba(231,223,212,.2)}
+.open nav{display:block;max-height:calc(100dvh - 64px);overflow-y:auto;padding-bottom:12px}
+.head-cta{display:none}
+@media(min-width:1080px){
+ .menu-btn{display:none}nav,.open nav{display:block;max-height:none;padding:0}
+ nav ul{display:flex;flex-wrap:wrap;justify-content:center;gap:0 6px}nav a{border:0;padding:8px 10px;font-size:14px}
+ nav a:hover{text-decoration:underline;text-underline-offset:6px}
+ .head-cta{display:inline-flex;min-height:40px;padding:0 16px}.mobile-only{display:none}}
+
+/* Hero */
+.hero{display:grid;background:var(--sand)}
+.hero-media{aspect-ratio:16/9;max-height:30vh;width:100%;overflow:hidden;background:#d8cdbf}
+.hero-media video,.hero-media img{width:100%;height:100%;object-fit:cover}
+.hero-text{padding:28px max(6vw,20px) 36px}
+.hero h1{font-size:clamp(44px,10vw,64px)}
+.hero h1 em{font-style:italic}
+.ctas{display:flex;flex-wrap:wrap;gap:12px;margin-top:22px}
+.ctas .btn{flex:1 1 220px}
+@media(min-width:860px){.hero{grid-template-columns:5fr 6fr;min-height:420px}.hero-media{aspect-ratio:auto;max-height:none}.hero-text{align-self:center}.ctas .btn{flex:0 0 auto}}
+
+/* Reviews */
+.reviews{display:flex;gap:16px;overflow-x:auto;scroll-snap-type:x mandatory;padding:4px 2px 14px;scrollbar-width:thin}
+.review{flex:0 0 min(78%,320px);scroll-snap-align:start;background:var(--cream);border-radius:14px;padding:18px 18px 16px;display:flex;flex-direction:column;text-align:center;align-self:start}
+.stars{letter-spacing:3px;font-size:16px;margin-bottom:8px}
+.review p{font-size:14px;margin:0;display:-webkit-box;-webkit-box-orient:vertical;-webkit-line-clamp:3;line-clamp:3;overflow:hidden}
+.review.full p{-webkit-line-clamp:unset;line-clamp:unset;display:block}
+.more-btn{background:none;border:0;color:var(--wine);font:400 13px "Nunito Sans",sans-serif;text-decoration:underline;text-underline-offset:3px;cursor:pointer;padding:8px;min-height:36px;align-self:center}
+.review b{font-weight:400;font-size:16px;margin-top:6px}
+.arrows{display:flex;gap:10px;justify-content:center;margin-top:12px}
+.arrows button{width:48px;height:48px;border-radius:50%;border:1px solid var(--wine);background:none;color:var(--wine);font-size:22px;cursor:pointer}
+
+/* Collection */
+.grid3{display:grid;gap:16px;grid-template-columns:repeat(2,minmax(0,1fr))}
+@media(min-width:760px){.grid3{grid-template-columns:repeat(3,minmax(0,1fr));gap:24px}}
+.tile{position:relative;border:0;padding:0;background:none;cursor:pointer;color:var(--wine);text-align:center}
+.tile img{width:100%;aspect-ratio:4/5;object-fit:cover}
+.tile span{display:block;background:rgba(231,223,212,.85);font:400 clamp(19px,4.5vw,26px)/1.2 "Cormorant Garamond",serif;padding:8px 4px;margin-top:-46px;position:relative}
+
+/* Gallery */
+.gallery{columns:2;column-gap:10px}
+.gallery img{width:100%;margin-bottom:10px;break-inside:avoid;cursor:zoom-in}
+@media(min-width:760px){.gallery{columns:3;column-gap:16px}.gallery img{margin-bottom:16px}}
+.more{display:flex;justify-content:center;margin-top:18px}
+
+/* Lightbox */
+.lb{position:fixed;inset:0;z-index:50;background:rgba(20,6,10,.94);display:none;flex-direction:column}
+.lb.on{display:flex}
+.lb-top{display:flex;justify-content:space-between;align-items:center;padding:10px 14px;color:var(--sand)}
+.lb-top h3{margin:0;font-size:24px}
+.lb-close{width:48px;height:48px;border:0;background:none;color:var(--sand);font-size:30px;cursor:pointer}
+.lb-track{flex:1;display:flex;overflow-x:auto;scroll-snap-type:x mandatory}
+.lb-track figure{flex:0 0 100%;margin:0;scroll-snap-align:center;display:grid;place-items:center;padding:8px}
+.lb-track img{max-height:calc(100dvh - 140px);width:auto;object-fit:contain}
+.lb-nav{display:flex;justify-content:center;gap:14px;padding:12px}
+.lb-nav button{width:48px;height:48px;border-radius:50%;border:1px solid var(--sand);background:none;color:var(--sand);font-size:22px;cursor:pointer}
+
+/* Flavours */
+.flav-layout{max-width:900px;margin:0 auto}
+.flav-img{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:8px;margin:28px auto 0;max-width:520px}
+.flav-img img{width:100%;aspect-ratio:1;object-fit:cover;border-radius:10px}
+.flav-grid{display:grid;gap:28px 40px;grid-template-columns:repeat(auto-fit,minmax(min(100%,240px),1fr))}
+.flav-grid h3{font-size:30px;border-bottom:1px solid var(--line);padding-bottom:4px;margin-bottom:12px}
+.flav-grid h3 em{font-size:.8em}
+.flav-grid ul{list-style:none;margin:0;padding:0;columns:2;column-gap:16px;font-size:15px}
+.flav-grid li{padding:3px 0;break-inside:avoid}
+.note{font-size:13px;margin-top:16px}
+.taste{margin-top:44px;padding-top:32px;border-top:1px solid var(--line)}
+
+/* Weddings */
+.w-hero{position:relative;min-height:440px;display:grid;align-items:end;color:var(--cream);overflow:hidden}
+.w-hero img{position:absolute;inset:0;width:100%;height:100%;object-fit:cover}
+.w-hero::after{content:"";position:absolute;inset:0;background:linear-gradient(to top,rgba(40,10,18,.75),rgba(40,10,18,.15))}
+.w-hero div{position:relative;z-index:1;padding:40px max(5vw,18px)}
+.w-hero h2{font-style:italic}
+.studio{display:grid;gap:12px}
+@media(min-width:760px){.studio{grid-template-columns:220px 1fr;align-items:center}.studio h2{border-right:1px solid var(--line);margin:0}}
+.studio h2{font-style:italic;font-size:clamp(32px,6vw,44px)}
+.steps{display:grid;gap:22px;grid-template-columns:repeat(auto-fit,minmax(min(100%,200px),1fr));margin-top:28px}
+.step b{display:block;font:400 30px/1 "Cormorant Garamond",serif}
+.step h3{font-size:26px;margin:2px 0 6px}
+.step p{font-size:14px;margin:0}
+.edit{display:grid;gap:12px;grid-template-columns:repeat(2,minmax(0,1fr))}
+.edit img{width:100%;aspect-ratio:4/5;object-fit:cover;cursor:zoom-in}
+@media(min-width:760px){.edit{grid-template-columns:repeat(3,minmax(0,1fr))}}
+
+/* Split with image + form */
+.split{display:grid;gap:28px;align-items:start}
+@media(min-width:860px){.split{grid-template-columns:1fr 1fr}}
+.split > img{width:100%;aspect-ratio:4/5;object-fit:cover}
+
+/* Forms */
+form{display:grid;gap:14px}
+.two{display:grid;gap:14px;grid-template-columns:repeat(auto-fit,minmax(min(100%,210px),1fr))}
+label{display:grid;gap:6px;font-size:14px}
+input,textarea{font:16px "Nunito Sans",sans-serif;color:var(--wine);background:transparent;border:1px solid var(--wine);border-radius:0;padding:12px;min-height:48px;width:100%;-webkit-appearance:none;appearance:none}
+input::placeholder,textarea::placeholder{color:rgba(101,32,49,.55)}
+input[type=file]{padding:10px;font-size:14px}
+textarea{min-height:130px;resize:vertical}
+
+/* Availability */
+.avail{display:grid;gap:28px}
+@media(min-width:860px){.avail{grid-template-columns:1.2fr 1fr;align-items:center}}
+.avail img{width:100%;height:auto;background:var(--cream)}
+
+/* Tasting */
+.t-banner{width:100%;aspect-ratio:16/7;object-fit:cover;margin:22px 0 30px}
+.slices{display:grid;gap:22px;grid-template-columns:repeat(2,minmax(0,1fr))}
+@media(min-width:860px){.slices{grid-template-columns:repeat(4,minmax(0,1fr))}}
+.slice img{width:100%;aspect-ratio:1;object-fit:cover;margin-bottom:10px}
+.slice h3{font-size:24px;margin-bottom:4px}
+.slice p{font-size:14px;margin:0}
+.little{margin-top:36px;border-top:1px solid var(--line);padding-top:24px}
+.little p{font-size:15px;max-width:75ch}
+
+/* FAQ */
+.search{display:flex;justify-content:flex-end;margin-bottom:18px}
+.search input{max-width:320px;border:0;border-bottom:1px solid var(--wine)}
+details{border:1px solid var(--wine);margin-bottom:10px}
+summary{cursor:pointer;list-style:none;padding:18px 54px 18px 18px;position:relative;font-size:17px}
+summary::-webkit-details-marker{display:none}
+summary::after{content:"";position:absolute;right:22px;top:24px;width:10px;height:10px;border-right:1.5px solid;border-bottom:1.5px solid;transform:rotate(45deg);transition:transform .2s}
+details[open] summary::after{transform:rotate(-135deg);top:28px}
+details p{padding:0 18px 6px;font-size:15px}
+details a{display:inline-block;margin:0 18px 16px}
+
+/* Footer contact band */
+footer{background:var(--wine);color:var(--sand);padding:52px max(5vw,18px) calc(28px + env(safe-area-inset-bottom));text-align:center}
+footer h2{font:400 clamp(22px,5vw,30px)/1.2 "Familjen Grotesk",sans-serif;letter-spacing:.12em;text-transform:uppercase}
+.contacts{display:grid;gap:18px;grid-template-columns:repeat(2,minmax(0,1fr));margin:32px auto 0;max-width:900px;padding-top:20px;border-top:1px solid rgba(231,223,212,.4);text-align:left}
+@media(min-width:760px){.contacts{grid-template-columns:repeat(4,minmax(0,1fr))}}
+.contacts small{display:block;font-size:12px;letter-spacing:.08em}
+.contacts a{text-decoration:none;display:inline-flex;align-items:center;gap:6px;padding:4px 0;font-size:14px;overflow-wrap:anywhere}
+.contacts svg{width:18px;height:18px;flex:none}
+.loc{max-width:900px;margin:22px auto 0;text-align:right;font-size:12px;letter-spacing:.08em;border-top:1px solid rgba(231,223,212,.4);padding-top:10px}
+
+/* Tasting request */
+.t-req{display:grid;gap:22px;margin-top:36px;padding:clamp(20px,4vw,36px);background:var(--cream);border-radius:16px}
+@media(min-width:860px){.t-req{grid-template-columns:1fr 1.3fr}}
+.release{font:500 15px "Familjen Grotesk",sans-serif;letter-spacing:.04em;background:var(--wine);color:var(--sand);display:inline-block;padding:8px 14px;border-radius:999px}
+.t-req.soldout form{opacity:.5;pointer-events:none}
+/* Availability calendar */
+.cal{max-width:860px;margin:26px auto 0}
+.cal-head{display:flex;align-items:flex-start;gap:8px}
+.cal-head>button{flex:none;width:44px;height:44px;border-radius:50%;border:1px solid var(--wine);background:none;color:var(--wine);font-size:20px;cursor:pointer;margin-top:12px}
+.cal-head>button:disabled{opacity:.25;cursor:default}
+.cal-months{flex:1;display:grid;gap:16px}
+@media(min-width:760px){.cal-months{grid-template-columns:1fr 1fr}}
+.month{background:var(--sand);border-radius:16px;padding:14px 10px 16px}
+.month h3{text-align:center;font-size:24px;margin:0 0 8px}
+.days{display:grid;grid-template-columns:repeat(7,minmax(0,1fr));gap:4px;text-align:center}
+.dow{font-size:11px;padding:4px 0;opacity:.7}
+.day{aspect-ratio:1;display:grid;place-items:center;border-radius:50%;font-size:14px;border:0;background:none;color:var(--wine);font-family:inherit;padding:0}
+.day.past{opacity:.3}
+.day.available{background:var(--cream);cursor:pointer}
+.day.limited{background:#cdb8a7;cursor:pointer}
+.day.booked,.day.closed{opacity:.4;text-decoration:line-through}
+.day.selected{background:var(--wine);color:var(--cream)}
+.legend{display:flex;flex-wrap:wrap;justify-content:center;gap:8px 18px;margin-top:14px;font-size:13px}
+.legend span{display:inline-flex;align-items:center;gap:6px}
+.dot{width:14px;height:14px;border-radius:50%;display:inline-block;border:1px solid var(--line)}
+.dot.av{background:var(--cream)}.dot.li{background:#cdb8a7}.dot.bk{background:transparent;opacity:.5}
+.picked{margin-top:16px;display:flex;flex-wrap:wrap;gap:12px;align-items:center;justify-content:space-between;background:var(--sand);border-radius:14px;padding:14px 16px}
+.picked[hidden]{display:none}
+.picked p{margin:0;font-size:15px}
+.check{display:flex;align-items:center;gap:10px;font-size:15px;cursor:pointer;min-height:44px}
+.check input{width:20px;height:20px;min-height:0;padding:0;-webkit-appearance:checkbox;appearance:auto;accent-color:var(--wine)}
+#eventFields:not([hidden]){display:grid;gap:0}
+@media(max-width:859px){.inq-img{display:none}}
+</style>
+</head>
+<body>
+
+<header id="top">
+ <div class="bar">
+  <a class="logo" href="#home" aria-label="R Sweet Studio home"><img src="https://static.wixstatic.com/media/27eccc_0404374cc1a449eabb19a57ca05a65cc~mv2.png/v1/fit/w_200,h_200,q_90/logo.png" alt="R Sweet Studio"></a>
+  <a class="btn light head-cta" href="#inquire">Inquire ↗</a>
+  <button class="menu-btn" id="menuBtn" aria-label="Open menu" aria-expanded="false" aria-controls="mainNav"><span></span></button>
+ </div>
+ <nav id="mainNav" aria-label="Main">
+  <ul>
+   <li><a href="#home">Home</a></li>
+   <li><a href="#collection">The Collection</a></li>
+   <li><a href="#flavours">Flavours</a></li>
+   <li><a href="#weddings">Weddings and Events</a></li>
+   <li><a href="#availability">Availability</a></li>
+   <li><a href="#tasting">Tasting Boxes</a></li>
+   <li><a href="#faq">FAQ / Contact Us</a></li>
+   <li><a href="#gallery">Gallery</a></li>
+   <li class="mobile-only"><a href="#inquire">Inquire ↗</a></li>
+  </ul>
+ </nav>
+</header>
+
+<main>
+<!-- HOME -->
+<section class="hero" id="home">
+ <div class="hero-media">
+  <video autoplay muted loop playsinline preload="metadata"
+   poster="https://static.wixstatic.com/media/27eccc_4ab3c0486c304af89ad15ff3aa7173d9f000.jpg/v1/fill/w_1000,h_800,al_c,q_80/hero.jpg"
+   src="https://video.wixstatic.com/video/27eccc_4ab3c0486c304af89ad15ff3aa7173d9/720p/mp4/file.mp4"></video>
+ </div>
+ <div class="hero-text">
+  <p class="eyebrow">R Sweet Studio</p>
+  <h1>Elegance in <em>every</em> detail.</h1>
+  <p class="sub">Desserts made personal. Details made unforgettable.</p>
+  <div class="ctas">
+   <a class="btn" href="#collection">Explore the collection</a>
+   <a class="btn ghost" href="#inquire">Make an inquiry</a>
+  </div>
+ </div>
+</section>
+
+<section class="band" aria-label="Reviews" style="padding-block:36px">
+ <div class="wrap">
+  <div class="reviews" id="revList" tabindex="0"></div>
+  <div class="arrows"><button type="button" id="rPrev" aria-label="Previous review">‹</button><button type="button" id="rNext" aria-label="Next review">›</button></div>
+ </div>
+</section>
+
+<!-- THE COLLECTION -->
+<section class="band cream" id="collection">
+ <div class="wrap center">
+  
+  <h2>The Collection</h2>
+  <p class="sub">Explore our signature styles and most requested designs.</p>
+  <hr class="rule">
+  <div class="grid3" id="colGrid"></div>
+ </div>
+</section>
+
+<!-- FLAVOURS -->
+<section class="band cream" id="flavours">
+ <div class="wrap">
+  <div class="center"><h2>Flavours</h2>
+   <p class="sub"><em>A curated selection of cake and filling flavours, from timeless classics to signature favourites.</em></p><hr class="rule"></div>
+  <div class="flav-layout">
+   <div>
+    <div class="flav-grid">
+     <div><h3>CAKES - <em>classics</em></h3><ul><li>Vanilla</li><li>French Vanilla</li><li>Funfetti</li><li>Chocolate</li><li>Red Velvet</li></ul></div>
+     <div><h3>CAKES - <em>signature</em></h3><ul><li>Fruit Options</li><li>Biscoff</li><li>Carrot</li><li>Pistachio</li><li>Tiramisu</li><li>Cookies &amp; Cream</li></ul></div>
+     <div><h3>FILLINGS - <em>classics</em></h3><ul><li>Vanilla Buttercream</li><li>Chocolate Ganache</li><li>Cream Cheese Frosting</li><li>Chocolate Buttercream</li></ul></div>
+     <div><h3>FILLINGS - <em>signature</em></h3><ul><li>Fresh Fruit</li><li>Pistachio Cream</li><li>Hazelnut Spread</li><li>Dulce de Leche</li><li>Biscoff</li><li>Fruit jams/compotes</li><li>Salted Caramel</li><li>Lemon Curd</li></ul></div>
+    </div>
+    <div class="flav-img" id="flavImgs" aria-label="Cake photos"></div>
+    <p class="note center"><em>Custom flavours and fillings may be available upon request.</em></p>
+    <div class="taste center">
+     <p class="eyebrow">A little taste of everything</p>
+     <h2>Can't choose just one?</h2>
+     <p class="sub"><em>Discover your favourites with our curated tasting boxes, available on select days.</em></p>
+     <a class="btn" href="#tasting">Explore tasting boxes ↗</a>
+     <p class="note">*Signature cake flavours and fillings are subject to an additional charge based on cake size. Please inquire for pricing and disclose any allergies when placing your order.</p>
+    </div>
+   </div>
+  </div>
+ </div>
+</section>
+
+<!-- WEDDINGS AND EVENTS -->
+<section id="weddings">
+ <div class="w-hero">
+  <img src="https://static.wixstatic.com/media/27eccc_6b255b276e544801bf9a4ed441068eb3~mv2.png/v1/fill/w_1400,h_900,al_c,q_80/weddings.png" alt="Engagement cake with piped buttercream">
+  <div class="wrap" style="width:100%">
+   
+   <h2>Weddings &amp; Events</h2>
+   <p><em>For the celebrations you'll remember forever.</em></p>
+   <p class="sub">From intimate gatherings to grand celebrations, we're here to create dessert that's as personal as the occasion itself.</p>
+  </div>
+ </div>
+ <div class="band">
+  <div class="wrap">
+   <div class="studio"><h2>The Studio</h2><p class="sub" style="margin:0"><em>From intimate gatherings to grand celebrations, our work brings together distinctive designs, intricate details, and a love for creating something a little different.</em></p></div>
+   <hr class="rule">
+   <h2 style="font-style:italic">The Experience</h2>
+   <p class="sub"><em>A thoughtful journey from your vision to the final details.</em></p>
+   <div class="steps">
+    <div class="step"><b>01.</b><h3>Your Vision</h3><p>Share your celebration, inspiration, and the details you have in mind.</p></div>
+    <div class="step"><b>02.</b><h3>Design</h3><p>Together, we'll explore the style, flavours, and finishing touches.</p></div>
+    <div class="step"><b>03.</b><h3>The Reservation</h3><p>Once everything feels right, we'll secure your date and confirm the details.</p></div>
+    <div class="step"><b>04.</b><h3>The Occasion</h3><p>Your cake, thoughtfully created and finished for your celebration.</p></div>
+   </div>
+  </div>
+ </div>
+ <div class="band wine">
+  <div class="wrap center">
+   <h2 style="font-style:italic">The Wedding Edit</h2>
+   <p class="sub"><em>A curated selection of our wedding and event creations, from understated elegance to statement designs.</em></p>
+   <div class="edit" id="editGrid"></div>
+  </div>
+ </div>
+ <div class="band center">
+  <h2>Wedding &amp; Event Inquiry</h2>
+  <p class="sub"><em>Tell us about your upcoming celebration. We'll take it from there.</em></p>
+  <a class="btn" href="#inquire" id="wedBtn">Start a wedding or event inquiry</a>
+ </div>
+</section>
+
+<!-- AVAILABILITY -->
+<section class="band cream" id="availability">
+ <div class="wrap">
+  <div class="center">
+   <h2>Availability</h2>
+   <p class="sub"><em>Explore our upcoming availability and find a date that works for your celebration.</em></p>
+   <p class="sub">Our calendar is updated regularly to reflect current availability. We recommend reaching out in advance, particularly for weekends and larger events.</p>
+  </div>
+  <div class="cal">
+   <div class="cal-head"><button type="button" id="calPrev" aria-label="Previous month">‹</button><div id="calMonths" class="cal-months"></div><button type="button" id="calNext" aria-label="Next month">›</button></div>
+   <div class="legend"><span><i class="dot av"></i>Available</span><span><i class="dot li"></i>Limited</span><span><i class="dot bk"></i>Fully booked</span></div>
+   <div class="picked" id="picked" hidden><p><b id="pickedText"></b><br><span id="pickedNote"></span></p><a class="btn" href="#inquire" id="pickBtn">Request this date</a></div>
+  </div>
+  <div class="center" style="margin-top:22px">
+   <p class="sub">See a date marked as fully booked? Reach out anyway! Depending on your request, we may still be able to accommodate you.</p>
+   <a class="btn ghost" href="#inquire">Contact us ↗</a>
+  </div>
+ </div>
+</section>
+
+<!-- TASTING BOXES -->
+<section class="band" id="tasting">
+ <div class="wrap">
+  <div class="center">
+   
+   <h2>Tasting Boxes</h2>
+   <p class="sub"><em>A selection of our classic and signature flavours, available to enjoy in one box.</em></p>
+   <p class="sub">Released once a month in limited quantities, our tasting boxes are the perfect way to explore our flavours before your next celebration — or simply treat yourself.</p>
+  </div>
+  <img class="t-banner" src="https://static.wixstatic.com/media/27eccc_bd2630cea3c449dc90fe9e90344f0550~mv2.png/v1/fill/w_1400,h_612,al_c,q_80/tasting.png" alt="Rows of layered cake slices" loading="lazy">
+  <h2 class="center">The Flavours</h2>
+  <div class="slices" id="sliceGrid"></div>
+  <div class="little">
+   <h3>A Little Note</h3>
+   <p>Our tasting boxes are freshly prepared in limited quantities and available for pickup on select dates. For the best experience, enjoy your slices at room temperature and keep refrigerated when not serving.</p>
+   <p>Please note that our kitchen handles common allergens, including nuts, dairy, eggs, wheat, and soy. Personalized flavour requests are subject to availability and may involve an additional charge.</p>
+  </div>
+  <div class="t-req" id="tasting-request">
+   <div>
+    <h2>Request a Tasting Box</h2>
+    <p class="release" id="tRelease"></p>
+    <p class="sub">Send us a request and we’ll reach out directly to confirm your box and pickup details.</p>
+   </div>
+   <form class="fs" id="tForm" action="https://formsubmit.co/hello@rsweetstudio.com" method="POST">
+    <input type="hidden" name="_subject" value="New Tasting Box Request">
+    <input type="hidden" name="_template" value="table">
+    <input type="hidden" name="Release Date" id="tReleaseField">
+    <div class="two">
+     <label>Full Name *<input name="Full Name" autocomplete="name" required></label>
+     <label>Email Address *<input name="email" type="email" autocomplete="email" required></label>
+    </div>
+    <div class="two">
+     <label>Phone Number<input name="Phone" type="tel" autocomplete="tel"></label>
+     <label>Number of Boxes *<input name="Number of Boxes" id="tQty" type="number" min="1" value="1" inputmode="numeric" required></label>
+    </div>
+    <label>Allergies or Notes<textarea name="Allergies or Notes" style="min-height:90px"></textarea></label>
+    <button class="btn" type="submit" id="tBtn">Request Tasting Box</button>
+   </form>
+  </div>
+ </div>
+</section>
+
+<!-- FAQ / CONTACT -->
+<section class="band cream" id="faq">
+ <div class="wrap">
+  <div class="center"><h2>Frequently Asked Questions</h2><p class="sub">Everything you need to know before placing an order, all in one place.</p></div>
+  <div class="search"><input id="faqSearch" type="search" placeholder="Looking for something?" aria-label="Search the FAQ"></div>
+  <div id="faqList"></div>
+ </div>
+</section>
+
+
+<!-- INQUIRE -->
+<section class="band cream" id="inquire">
+ <div class="wrap split">
+  <img src="https://static.wixstatic.com/media/27eccc_d5b641ee342749b88f7546d40dc3a105~mv2.png/v1/fill/w_900,h_1125,al_c,q_80/inquire.png" alt="R Sweet Studio cake" loading="lazy" class="inq-img">
+  <div>
+   <h2>Inquiries</h2>
+   <p class="sub"><em>For custom orders, weddings, and events.</em></p>
+   <form class="fs" id="inqForm" action="https://formsubmit.co/hello@rsweetstudio.com" method="POST" enctype="multipart/form-data">
+    <input type="hidden" name="_subject" id="inqSubject" value="New Inquiry">
+    <input type="hidden" name="_template" value="table">
+    <div class="two">
+     <label>Full Name *<input name="Full Name" autocomplete="name" required></label>
+     <label>Email Address *<input name="email" type="email" autocomplete="email" required></label>
+    </div>
+    <div class="two">
+     <label>Date *<input name="Date" id="inqDate" type="date" required></label>
+     <label>Amount of Servings *<input name="Amount of Servings" inputmode="numeric" required></label>
+    </div>
+    <label class="check"><input type="checkbox" id="isEvent" name="Wedding or Event" value="Yes"> This is for a wedding or event</label>
+    <div id="eventFields" hidden>
+     <div class="two">
+      <label>Event Type *<input name="Event Type" data-req placeholder="Select an occasion"></label>
+      <label>Estimated Guest Count *<input name="Estimated Guest Count" inputmode="numeric" placeholder="e.g. 150" data-req></label>
+     </div>
+     <label style="margin-top:14px">Venue/Location<input name="Venue/Location" placeholder="Event venue or city"></label>
+    </div>
+    <label>Tell Us What You Have in Mind *<textarea name="Tell Us What You Have in Mind" placeholder="Share your ideas, preferred style, flavours, or anything else you'd like us to know." required></textarea></label>
+    <label>Inspiration Photos<input type="file" name="attachment" accept="image/*"></label>
+    <button class="btn" type="submit">Send Inquiry</button>
+   </form>
+  </div>
+ </div>
+</section>
+
+<!-- GALLERY -->
+<section class="band" id="gallery">
+ <div class="wrap">
+  <div class="center"><h2>Gallery</h2><hr class="rule"></div>
+  <div class="gallery" id="galGrid"></div>
+  <div class="more"><button class="btn ghost" type="button" id="galMore">Load more</button></div>
+  <div class="more"><a class="btn" href="https://www.instagram.com/rsweetstudio/">Follow @rsweetstudio on Instagram</a></div>
+ </div>
+</section>
+
+</main>
+
+<footer>
+ <p class="eyebrow">We'd love to hear from you</p>
+ <h2>Your vision, our studio.</h2>
+ <p>For custom orders, collaborations, and general inquiries.</p>
+ <a class="btn light" href="#inquire">Make an inquiry</a>
+ <div class="contacts">
+  <div><small>EMAIL</small><a href="mailto:hello@rsweetstudio.com">hello@rsweetstudio.com</a></div>
+  <div><small>INSTAGRAM</small><a href="https://www.instagram.com/rsweetstudio/"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6"><rect x="3" y="3" width="18" height="18" rx="5"/><circle cx="12" cy="12" r="4"/><circle cx="17.5" cy="6.5" r="1" fill="currentColor"/></svg>rsweetstudio</a></div>
+  <div><small>TIKTOK</small><a href="https://www.tiktok.com/@r.sweet.studio"><svg viewBox="0 0 24 24" fill="currentColor"><path d="M16.6 5.8A4.3 4.3 0 0 1 15.5 3h-3.1v12.4a2.6 2.6 0 1 1-2.6-2.6c.3 0 .5 0 .8.1V9.7a5.7 5.7 0 1 0 4.9 5.7V9.1a7.3 7.3 0 0 0 4.3 1.4V7.4a4.3 4.3 0 0 1-3.2-1.6z"/></svg>r.sweet.studio</a></div>
+  <div><small>FACEBOOK</small><a href="https://www.facebook.com/share/1Bq3ZBCEi4/?mibextid=wwXIfr"><svg viewBox="0 0 24 24" fill="currentColor"><path d="M22 12a10 10 0 1 0-11.6 9.9v-7H7.9V12h2.5V9.8c0-2.5 1.5-3.9 3.8-3.9 1.1 0 2.2.2 2.2.2v2.5h-1.2c-1.2 0-1.6.8-1.6 1.6V12h2.8l-.4 2.9h-2.3v7A10 10 0 0 0 22 12z"/></svg>R Sweet Studio</a></div>
+ </div>
+ <p class="loc">OTTAWA, ON</p>
+</footer>
+
+<div class="lb" id="lb" role="dialog" aria-modal="true" aria-label="Photo viewer">
+ <div class="lb-top"><h3 id="lbTitle"></h3><button class="lb-close" id="lbClose" aria-label="Close">×</button></div>
+ <div class="lb-track" id="lbTrack"></div>
+ <div class="lb-nav"><button type="button" id="lbPrev" aria-label="Previous photo">‹</button><button type="button" id="lbNext" aria-label="Next photo">›</button></div>
+</div>
+
+<script>
+{
+ const $=s=>document.querySelector(s);
+ const esc=s=>String(s).replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+ // Wix-hosted photo, resized. To host photos yourself, download them into a "photos" folder and change this function.
+ const pic=(id,w=700,h=875)=>`https://static.wixstatic.com/media/${id}/v1/fill/w_${w},h_${h},al_c,q_80,enc_auto/photo.${id.split('.').pop()}`;
+ const full=id=>`https://static.wixstatic.com/media/${id}/v1/fit/w_1400,h_1800,q_85,enc_auto/photo.${id.split('.').pop()}`;
+ const P='27eccc_';
+
+ // Menu
+ const hdr=$('#top'),mb=$('#menuBtn');
+ mb.addEventListener('click',()=>{const o=hdr.classList.toggle('open');mb.setAttribute('aria-expanded',o);mb.setAttribute('aria-label',o?'Close menu':'Open menu')});
+ document.querySelectorAll('nav a').forEach(a=>a.addEventListener('click',()=>{hdr.classList.remove('open');mb.setAttribute('aria-expanded','false')}));
+
+ // Reviews (full text from the current site)
+ const reviews=[
+  ['Sara V.','Absolutely blown away by the incredible cake!!! Cake was absolutely stunning & very delicious! R Sweet Studio was super quick at responding, easy to work with, & had great communication. She even delivered the cake to the venue day of the event which was super helpful!! I will definitely be back!'],
+  ['Maryam A.','I can’t really thank her enough! She did an amazing job. She’s an absolute artist!! The cake looks sooo good I didn’t wanna eat it 😭😭. The size of the cake is really good “6”. Shes really kind she did it for me last minute as well. I’m so happy and glad she took my order 2 days before my birthday!'],
+  ['Ruby M.','The cake turned out absolutely amazing! I’m so glad I found you before my birthday. You truly helped make my day extra special. Thank you so much!'],
+  ['Kimberly H.','The absolute best at delivering the prettiest cakes ever! So accommodating, friendly, and amazing service'],
+  ['Jenn K.','I ordered a grad cake from rsweetstudio! It was absolutely stunning and tasted even better than it looked. Everyone loved it and kept talking about how delicious it was! The cake itself was so moist, flavourful, and beautifully made. You truly exceeded my expectations, and I can’t wait to order from your business again in the future. Thank you for helping make the celebration so special 🤍'],
+  ['Batoul Z.','Absolutely loved the cake R Sweet Studio made for my mom’s birthday! 🎂🤍 It was not only beautiful but tasted amazing too. Every detail was done perfectly, and it was exactly what I envisioned. Everyone at the party kept complimenting it! Thank you for helping make my mom’s day so special. Highly recommend! ✨'],
+  ['Jewel D.','Rana was amazing! She was super easy to communicate with and the cake was so beautiful, & buttercream was so good! The pick up process was super easy and I can’t wait to order from Rana again!'],
+  ['Binta C.','The cake was beautiful and tasted amazing! She was so sweet and professional, and everything turned out exactly how I wanted. I would definitely order again!'],
+  ['Zahraa A.','The cake was absolutely stunning and tasty!! Thank you rsweet!'],
+  ['Anna S.','Got a cake for an event, it was beautifully decorated and delicious!']
+ ];
+ const rl=$('#revList');
+ rl.innerHTML=reviews.map(r=>`<article class="review"><div class="stars" aria-label="5 stars">★★★★★</div><p>${esc(r[1])}</p><button class="more-btn" type="button" hidden>See more</button><b>${esc(r[0])}</b></article>`).join('');
+ const markLong=()=>rl.querySelectorAll('.review:not(.full)').forEach(a=>{const p=a.querySelector('p');a.querySelector('.more-btn').hidden=p.scrollHeight<=p.clientHeight+2});
+ markLong();window.addEventListener('resize',markLong);document.fonts&&document.fonts.ready.then(markLong);
+ rl.addEventListener('click',e=>{const b=e.target.closest('.more-btn');if(!b)return;const a=b.closest('.review');const on=a.classList.toggle('full');b.textContent=on?'See less':'See more'});
+ const rStep=()=>rl.firstElementChild.getBoundingClientRect().width+16;
+ $('#rPrev').addEventListener('click',()=>rl.scrollBy({left:-rStep(),behavior:'smooth'}));
+ $('#rNext').addEventListener('click',()=>rl.scrollBy({left:rStep(),behavior:'smooth'}));
+
+ // Lightbox
+ const lb=$('#lb'),track=$('#lbTrack');
+ const openLB=(title,ids,start=0)=>{$('#lbTitle').textContent=title;track.innerHTML=ids.map(id=>`<figure><img src="${full(id)}" alt="${esc(title)}" loading="lazy"></figure>`).join('');lb.classList.add('on');document.body.style.overflow='hidden';requestAnimationFrame(()=>track.scrollTo({left:start*track.clientWidth}))};
+ const closeLB=()=>{lb.classList.remove('on');document.body.style.overflow=''};
+ $('#lbClose').addEventListener('click',closeLB);
+ $('#lbPrev').addEventListener('click',()=>track.scrollBy({left:-track.clientWidth,behavior:'smooth'}));
+ $('#lbNext').addEventListener('click',()=>track.scrollBy({left:track.clientWidth,behavior:'smooth'}));
+ document.addEventListener('keydown',e=>{if(!lb.classList.contains('on'))return;if(e.key==='Escape')closeLB();if(e.key==='ArrowRight')$('#lbNext').click();if(e.key==='ArrowLeft')$('#lbPrev').click()});
+
+ // The Collection (cover photo + the photos on each collection page)
+ const collections=[
+  ['Most Loved','799f6cedb7ea40e7889d41798571f582~mv2.jpg',['7ea02866616b4cffbb4e06286b3d9bd8~mv2.jpg','2da208153baa469eb940a4de32ce2fb8~mv2.jpg','d5b641ee342749b88f7546d40dc3a105~mv2.png','f6d1f71ed3ae45fcbec38e0e3ed19f19~mv2.jpg','8ba1cb80f2c64fd5bc79db865808d071~mv2.png','3413f5b8dc1c49e3b16b4d38d353d561~mv2.png','c60ace1b3e2b4be08c1b8aab6e4656ed~mv2.jpg','3d765ed318464d09bd0aa7d7cd1b3d20~mv2.jpg']],
+  ['Statement Slabs','60980b85ce15428d894141068a017d22~mv2.jpg',['a385d55d08bf4411a92ea0f5d3e6dc07~mv2.jpg','dbfabec1205c488e9677ea140dba06c0~mv2.png','f1b24f4dd4e04479bfd4d1a82867405d~mv2.jpg','e81efb87e20b45eab286ad0fe5b74778~mv2.jpg','58693acc88c948229eb7934b3dd4d57c~mv2.png','7405190dcea241688e91fe3662918851~mv2.png','7ed813a9412b4f159c5f7e78f5e71d12~mv2.jpg','063651bc0a1845f195e527da1b43cd65~mv2.jpg','48fe1250ce364862a41adb2f31d05050~mv2.png']],
+  ['Tiered Creations','844071ce74594978b2829dbe96752caa~mv2.jpg',['8ad319343c604cc796c7d45118a36f3a~mv2.jpg','1ab12a3a7dfd40d780b9d3a55af79f90~mv2.jpg','edf460d11f844583b3b285e04f3d377a~mv2.jpg','06588dd5ce1b4f609c9a58f47ddb511a~mv2.jpg','7e0296844bd142cfad2fa3f8019b1bfc~mv2.jpg','6d80b466859a4a94af6efa604f116aab~mv2.jpg','40ca9c83113e4581b07feff08cbb5899~mv2.jpg','c26c60676c8b402dbeb8b96c77fcbc22~mv2.jpg','9814dc8014124487a038d316bf28102e~mv2.jpg','fe98538f879b4c8193482a3d953b6542~mv2.jpg','bb3973b19c8141db92fc8c78b754b1e3~mv2.jpg','abd52bd1eac54f2395573a5322650629~mv2.jpg','8b52ee3075e64b01ac2c1272eb0de537~mv2.jpg']],
+  ['Star Creations','692eefb245d34ff88605c476906a8c15~mv2.jpg',['f6d1f71ed3ae45fcbec38e0e3ed19f19~mv2.jpg','2b7aaf7e4ee0493fb11c5183e2ba6152~mv2.jpg','4b11fa20ba494ba293778786b8c34b49~mv2.jpg','3f5d938e86524620bff18ed39f41f0cd~mv2.jpg']],
+  ['Vintage Collection','f70f550156d14ee481c3324e48f4887b~mv2.jpg',['e9aac720aeb344a09c4fc5a1c0954c35~mv2.jpg','f6c80213f0c846f18acd87b75decd9b4~mv2.jpg','39ba99f8abbb434abc3005d619a057b4~mv2.png','811de5acbc23406bb0bdfa2f05cf8743~mv2.jpg','1241ccbcb4224a329a3e1e67324e5c38~mv2.jpg','dde807f81df04e29b8a12f4925a3a6d0~mv2.jpg','99f4e91fc585465a8e02254daefab71a~mv2.jpg','37e3c6f027f843ad9a945788a68ad8be~mv2.jpg','e1110176f86c42f3aa3c5a53b35a1e9f~mv2.jpg','1f3cc8c14ad64fec906adfac87e0ba92~mv2.jpg','111b1bd552544c4895714ef873fe4ba4~mv2.jpg','f44355f3080e4be98c25633140686dec~mv2.jpg','e13cdcc8c6df4e7cadd9ffc813dab1b0~mv2.jpg','02341958133f4196b5f976f1785d5978~mv2.jpg','4adea714e0f3495fa6e65bfe5fd707d0~mv2.jpg','9479af1525e14a08b0277dfb61911f64~mv2.png']],
+  ['Dagger Collection','da9219022bb14f1f85818fc96bfd9174~mv2.jpg',['d0aaf108acba462eb3635bbab0c44665~mv2.jpg','2da208153baa469eb940a4de32ce2fb8~mv2.jpg','d5b641ee342749b88f7546d40dc3a105~mv2.png','3413f5b8dc1c49e3b16b4d38d353d561~mv2.png','5bb242f35acb4b4e81a1e62e1258aeeb~mv2.jpg','d4a5c3507dd54857b6fd592ebf87cbb9~mv2.jpg']]
+ ].map(c=>[c[0],P+c[1],c[2].map(x=>P+x)]);
+ $('#colGrid').innerHTML=collections.map((c,i)=>`<button class="tile" type="button" data-i="${i}"><img src="${pic(c[1])}" alt="${esc(c[0])}" loading="lazy"><span>${esc(c[0])}</span></button>`).join('');
+ $('#colGrid').addEventListener('click',e=>{const t=e.target.closest('.tile');if(t){const c=collections[t.dataset.i];openLB(c[0],c[2])}});
+
+ // Gallery (photos from the current Gallery page)
+ const gallery=['eea10c31cf734638a2e67643779efdd5~mv2.jpg','60980b85ce15428d894141068a017d22~mv2.jpg','ff7360fcf7a241249cbffeb812e8f29a~mv2.jpg','e9aac720aeb344a09c4fc5a1c0954c35~mv2.jpg','fe98538f879b4c8193482a3d953b6542~mv2.jpg','f44f82e0a1584274b6de2d76e9c79a86~mv2.jpg','3c1b55594e3e41278e7732c9849b4b62~mv2.jpg','3d765ed318464d09bd0aa7d7cd1b3d20~mv2.jpg','8ad319343c604cc796c7d45118a36f3a~mv2.jpg','abd52bd1eac54f2395573a5322650629~mv2.jpg','f87c999d3245487fb7a70311931a7ca0~mv2.png','d6d4c48db11942e68bcee7ee526e7314~mv2.png','48fe1250ce364862a41adb2f31d05050~mv2.png','8b52ee3075e64b01ac2c1272eb0de537~mv2.jpg','d0aaf108acba462eb3635bbab0c44665~mv2.jpg','8ba1cb80f2c64fd5bc79db865808d071~mv2.png','3413f5b8dc1c49e3b16b4d38d353d561~mv2.png','7405190dcea241688e91fe3662918851~mv2.png','58693acc88c948229eb7934b3dd4d57c~mv2.png','47f7aa7c51934fdf8306cf2f28e51cf5~mv2.png','9656555db0f4476595189b43fcda448b~mv2.jpg','7ed813a9412b4f159c5f7e78f5e71d12~mv2.jpg','6d80b466859a4a94af6efa604f116aab~mv2.jpg','bd43519a1fce4f0b9a0d937d2ca22161~mv2.jpg','dbfabec1205c488e9677ea140dba06c0~mv2.png'].map(x=>P+x);
+ let shown=0;const galGrid=$('#galGrid'),galMore=$('#galMore');
+ const addGal=()=>{const next=gallery.slice(shown,shown+12);galGrid.insertAdjacentHTML('beforeend',next.map((id,k)=>`<img src="${pic(id,600,750)}" data-k="${shown+k}" alt="R Sweet Studio cake" loading="lazy">`).join(''));shown+=next.length;if(shown>=gallery.length)galMore.hidden=true};
+ addGal();galMore.addEventListener('click',addGal);
+ galGrid.addEventListener('click',e=>{const im=e.target.closest('img');if(im)openLB('Gallery',gallery,+im.dataset.k)});
+
+ // Flavours photos
+ $('#flavImgs').innerHTML=['3ce96d0e83664e499203ed3bf484532e~mv2.jpg','aeced39249f347f0907b2a2543a9fa52~mv2.jpg','3dee6872a2394bd986321e0f4ea77efd~mv2.jpg'].map(x=>`<img src="${pic(P+x,360,360)}" alt="Cake layers" loading="lazy">`).join('');
+
+ // The Wedding Edit
+ const edit=['1322329cc99a47458e1674fa8453c6a2~mv2.jpg','1c8be786c6ef4eaba7c541e707006b16~mv2.jpg','47da4361a12a467aad0b326836a7427b~mv2.jpg','c6294ccedba94be1be6a86fe95064b01~mv2.jpg','527a9b485cdd4aae84f798255c262f11~mv2.jpg','6b255b276e544801bf9a4ed441068eb3~mv2.png'].map(x=>P+x);
+ $('#editGrid').innerHTML=edit.map((id,k)=>`<img src="${pic(id)}" data-k="${k}" alt="Wedding and event cake" loading="lazy">`).join('');
+ $('#editGrid').addEventListener('click',e=>{const im=e.target.closest('img');if(im)openLB('The Wedding Edit',edit,+im.dataset.k)});
+
+ // Tasting box flavours
+ const slices=[
+  ['Vanilla Bean','Moist vanilla sponge layered with vanilla bean buttercream.','91feb05be94f4963a4eda2f427c567a7~mv2.png'],
+  ['Chocolate Fudge','Rich chocolate sponge layered with smooth chocolate buttercream.','27892d2a86864204accf98b9839aed9a~mv2.png'],
+  ['Red Velvet','Soft red velvet sponge layered with cream cheese frosting.','56e7cf23d6674295b4015fd994f26902~mv2.png'],
+  ['Pistachio Praline','Pistachio sponge layered with pistachio cream and crunchy pistachio pieces.','9cc87ea6235745c0868456cbd3e8167c~mv2.png'],
+  ['Lemon Blueberry','Lemon sponge layered with blueberry compote and vanilla buttercream.','46f429c59e044a798637896d9a752356~mv2.png'],
+  ['Tiramisu','Vanilla sponge soaked in espresso, layered with chocolate ganache and mascarpone cream.','002bbc30772f48ab904bfa92cdda22cb~mv2.png'],
+  ['Brown Butter Caramel','Brown butter sponge layered with buttercream and smooth, whipped salted caramel.','bc25d8da64b54d42aaa452c2733da7a5~mv2.png'],
+  ['Biscoff Crunch','Vanilla sponge layered with Biscoff cream and caramelized cookie crunch.','20b64527cc82473eadfa8381e0b003aa~mv2.png']
+ ];
+ $('#sliceGrid').innerHTML=slices.map(s=>`<div class="slice"><img src="${pic(P+s[2],500,500)}" alt="${esc(s[0])} cake slice" loading="lazy"><h3>${esc(s[0])}</h3><p>${esc(s[1])}</p></div>`).join('');
+
+ // FAQ (word for word from the current site)
+ const faq=[
+  ['How far in advance should I place an order?','For custom orders, we recommend booking at least 2–3 weeks in advance. For weddings and larger events, we suggest reaching out 3–6 months ahead, and ideally 6 months or more for summer weddings. Availability is limited, and dates are secured on a first-come, first-served basis.'],
+  ['How do I place an order?','Simply submit an inquiry through our website or contact us directly on Instagram at @rsweetstudio. Share your preferred date, size, flavour, and design inspiration, and we’ll get back to you with a personalized quote.',['Message us on Instagram','https://www.instagram.com/rsweetstudio/']],
+  ['Do you require a deposit?','Yes! A 50% non-refundable deposit is required to secure your booking. Your date is only reserved once the deposit has been received.'],
+  ['Do you offer delivery?','Delivery may be available depending on your location and our schedule. Delivery fees are calculated separately based on distance and order requirements.'],
+  ['Can I customize my design?','Absolutely! Each creation is thoughtfully designed to reflect your vision. You’re welcome to share inspiration photos, colour palettes, and any details you have in mind. Please note that designs are recreated in our own style rather than replicated exactly.'],
+  ['How should I store my cake?','Keep your cake refrigerated until shortly before serving. For the best flavour and texture, we recommend allowing it to come to room temperature for at least an hour before enjoying. Specific storage instructions may vary depending on the fillings and design.'],
+  ['Do you offer wedding and event orders?','Yes! We specialize in custom creations for weddings, celebrations, and special events. Visit our Weddings & Events page to explore our offerings and submit a dedicated inquiry.',['Weddings & Events','#weddings']],
+  ['Do you offer tasting boxes?','Yes! Our tasting boxes feature a curated selection of signature flavours and are released monthly in limited quantities. Visit our Tasting Boxes page to explore the collection and place a preorder.',['Tasting Boxes','#tasting']],
+  ['Do you offer gluten-free or allergy-friendly options?','Please let us know about any dietary restrictions before placing an order so we can discuss available options. Our kitchen handles common allergens, including nuts, dairy, eggs, wheat, and soy, and we cannot guarantee an allergen-free environment.'],
+  ['Can I make changes after booking?','We understand that plans can change! Please contact us as soon as possible if you need to make an adjustment. Changes are subject to availability and may affect the final price.'],
+  ['What is your cancellation policy?','All deposits are non-refundable, as they secure your date and allow us to begin planning your order. Please contact us directly if your circumstances change.']
+ ];
+ $('#faqList').innerHTML=faq.map(f=>`<details><summary>${esc(f[0])}</summary><p>${esc(f[1])}</p>${f[2]?`<a href="${esc(f[2][1])}">${esc(f[2][0])} ↗</a>`:''}</details>`).join('');
+ $('#faqSearch').addEventListener('input',e=>{const q=e.target.value.trim().toLowerCase();document.querySelectorAll('#faqList details').forEach(d=>{d.hidden=q&&!d.textContent.toLowerCase().includes(q)})});
+ document.querySelectorAll('#faqList a[href^="#"]').forEach(a=>a.addEventListener('click',()=>a.closest('details').open=false));
+ // ===== AVAILABILITY: edit these dates (format "YYYY-MM-DD") =====
+ const CAL={
+  bookedDates:["2026-11-16","2026-11-17","2026-11-18","2026-11-19","2026-11-20","2026-11-21","2026-11-22","2026-11-28","2026-12-18","2026-12-19","2026-12-20","2026-12-21","2026-12-22","2026-12-23","2026-12-24","2026-12-25","2026-12-26"],
+  limitedDates:["2026-11-27","2026-12-05","2026-12-12","2026-12-13","2026-12-17","2026-12-19"], // dates that still have a spot or two
+  closedWeekdays:[],   // 0=Sun ... 6=Sat
+  minNoticeDays:3,     // dates sooner than this show as booked
+  monthsAhead:2        // how many months customers can browse
+ };
+ // ================================================================
+ {
+  const MONTHS=["January","February","March","April","May","June","July","August","September","October","November","December"];
+  const pad=n=>String(n).padStart(2,"0"),keyOf=d=>`${d.getFullYear()}-${pad(d.getMonth()+1)}-${pad(d.getDate())}`;
+  const today=new Date();today.setHours(0,0,0,0);
+  const earliest=new Date(today);earliest.setDate(earliest.getDate()+CAL.minNoticeDays);
+  const booked=new Set(CAL.bookedDates),limited=new Set(CAL.limitedDates);
+  const status=d=>{const k=keyOf(d);if(d<today)return"past";if(d<earliest||booked.has(k))return"booked";if(CAL.closedWeekdays.includes(d.getDay()))return"closed";if(limited.has(k))return"limited";return"available"};
+  const wide=matchMedia('(min-width:760px)');
+  let offset=0,sel=null;
+  const shown=()=>wide.matches?2:1;
+  const render=()=>{
+   const max=Math.max(0,CAL.monthsAhead-shown());if(offset>max)offset=max;
+   let out='';
+   for(let i=0;i<shown();i++){
+    const y=today.getFullYear(),m=today.getMonth()+offset+i,first=new Date(y,m,1),dim=new Date(y,m+1,0).getDate();
+    let cells=['S','M','T','W','T','F','S'].map(d=>`<div class="dow">${d}</div>`).join('')+'<div></div>'.repeat(first.getDay());
+    for(let d=1;d<=dim;d++){const dt=new Date(y,m,d),st=status(dt),k=keyOf(dt),ok=st==='available'||st==='limited';
+     cells+=ok?`<button type="button" class="day ${st}${k===sel?' selected':''}" data-k="${k}" data-st="${st}" aria-label="${MONTHS[first.getMonth()]} ${d}, ${st}">${d}</button>`:`<div class="day ${st}" aria-label="${d}, ${st==='past'?'past':'unavailable'}">${d}</div>`}
+    out+=`<div class="month"><h3>${MONTHS[first.getMonth()]} ${first.getFullYear()}</h3><div class="days">${cells}</div></div>`}
+   $('#calMonths').innerHTML=out;$('#calPrev').disabled=offset<=0;$('#calNext').disabled=offset>=max};
+  $('#calPrev').addEventListener('click',()=>{offset--;render()});
+  $('#calNext').addEventListener('click',()=>{offset++;render()});
+  wide.addEventListener('change',render);
+  $('#calMonths').addEventListener('click',e=>{const b=e.target.closest('button.day');if(!b)return;sel=b.dataset.k;
+   const [y,m,d]=sel.split('-').map(Number);
+   $('#pickedText').textContent=new Date(y,m-1,d).toLocaleDateString('en-CA',{weekday:'long',month:'long',day:'numeric',year:'numeric'});
+   $('#pickedNote').textContent=b.dataset.st==='limited'?'Only a few spots left — book soon!':'This date is available';
+   $('#picked').hidden=false;render()});
+  $('#pickBtn').addEventListener('click',()=>{if(sel)$('#inqDate').value=sel});
+  render();
+ }
+
+
+ // ===== TASTING BOXES: edit for each monthly release =====
+ const TASTING={
+  releaseDate:"",      // pickup date, e.g. "2026-12-13" — leave "" if not announced yet
+  boxesLeft:null,      // e.g. 12 — set to 0 when sold out, or null to hide the count
+  maxPerRequest:4      // most boxes one person can request
+ };
+ // ========================================================
+ {
+  const r=$('#tRelease'),q=$('#tQty'),wrap=$('#tasting-request');
+  let label='Next release date coming soon';
+  if(TASTING.releaseDate){const [y,m,d]=TASTING.releaseDate.split('-').map(Number);label='Next pickup: '+new Date(y,m-1,d).toLocaleDateString('en-CA',{weekday:'long',month:'long',day:'numeric'})}
+  $('#tReleaseField').value=TASTING.releaseDate||'Not announced yet';
+  const max=TASTING.boxesLeft==null?TASTING.maxPerRequest:Math.min(TASTING.maxPerRequest,TASTING.boxesLeft);
+  q.max=Math.max(1,max);
+  if(TASTING.boxesLeft===0){label+=' · Sold out';wrap.classList.add('soldout');$('#tBtn').textContent='Sold out'}
+  else if(TASTING.boxesLeft!=null)label+=` · ${TASTING.boxesLeft} box${TASTING.boxesLeft===1?'':'es'} left`;
+  r.textContent=label;
+ }
+ // Inquiry form: wedding/event fields
+ const isEvent=$('#isEvent'),evf=$('#eventFields');
+ const setEvent=on=>{isEvent.checked=on;evf.hidden=!on;evf.querySelectorAll('[data-req]').forEach(i=>i.required=on);$('#inqSubject').value=on?'New Wedding & Event Inquiry':'New Inquiry'};
+ isEvent.addEventListener('change',()=>setEvent(isEvent.checked));
+ $('#wedBtn').addEventListener('click',()=>setEvent(true));
+}
+</script>
+</body>
+</html>
