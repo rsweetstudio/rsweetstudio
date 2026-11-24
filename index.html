@@ -191,14 +191,14 @@ video{pointer-events:none}
 /* Poster photo sits on top of each video until it is actually playing,
    so iPhone's play button can never show (and Low Power Mode shows the photo) */
 .vwrap{position:relative;overflow:hidden}
-.vwrap>video{display:block;opacity:0;transition:opacity .3s}
-.vwrap.on>video{opacity:1}
+.vwrap>video{display:block}
 .vposter{position:absolute;inset:0;width:100%;height:100%;object-fit:cover;z-index:2;pointer-events:none;transition:opacity .3s}
 .vwrap.on>.vposter{opacity:0}
 .hero-media .vwrap{width:100%;height:100%}
 .edit .vwrap{aspect-ratio:4/5;cursor:zoom-in}
 .edit .vwrap>video{position:absolute;inset:0;height:100%}
-.lb-track .vwrap{display:inline-block}
+.lb-track .vwrap{width:100%;height:calc(100dvh - 140px)}
+.lb-track .vwrap>video{position:absolute;inset:0;width:100%;height:100%;max-height:none;object-fit:contain}
 .lb-track .vposter{object-fit:contain}
 /* Burgundy accents */
 .review{color:var(--wine)}
@@ -524,15 +524,15 @@ video{pointer-events:none}
    ?`<video data-auto data-k="${k}" muted loop playsinline webkit-playsinline autoplay disablepictureinpicture disableremoteplayback controlslist="nodownload nofullscreen noremoteplayback" preload="metadata" poster="${vidPoster(s,w,h)}" src="${vidSrc(s,q)}" aria-label="${esc(alt)}"></video>`
    :`<img src="${pic(s,w,h)}" data-k="${k}" alt="${esc(alt)}" loading="lazy">`;
  // Play videos only while they're on screen (saves data and battery)
- const vio=new IntersectionObserver(es=>es.forEach(e=>{const v=e.target;if(e.isIntersecting){v.muted=true;const p=v.play();p&&p.catch(()=>{})}else v.pause()}),{threshold:.2});
+ const vio=new IntersectionObserver(es=>es.forEach(e=>{const v=e.target;v.dataset.vis=e.isIntersecting?'1':'0';if(e.isIntersecting){v.muted=true;const p=v.play();p&&p.catch(()=>{})}else v.pause()}),{threshold:.2});
  const wrapVid=v=>{if(v.parentNode.classList.contains('vwrap'))return;const w=document.createElement('div');w.className='vwrap';if(v.dataset.k!=null)w.dataset.k=v.dataset.k;
    v.parentNode.insertBefore(w,v);w.appendChild(v);const im=document.createElement('img');im.className='vposter';im.alt='';im.src=v.getAttribute('poster');w.appendChild(im);
-   v.addEventListener('playing',()=>w.classList.add('on'));v.addEventListener('pause',()=>{if(!v.ended&&v.currentTime===0)w.classList.remove('on')})};
+   v.addEventListener('playing',()=>w.classList.add('on'));v.addEventListener('canplay',()=>{if(v.paused&&v.dataset.vis==='1'){const p=v.play();p&&p.catch(()=>{})}});v.addEventListener('pause',()=>{if(!v.ended&&v.currentTime===0)w.classList.remove('on')})};
  const watchVideos=root=>root.querySelectorAll('video[data-auto]:not([data-w])').forEach(v=>{v.dataset.w=1;wrapVid(v);vio.observe(v)});
  const P='27eccc_';
 
  // Hero video
- {const v=$('#heroVid');wrapVid(v);v.muted=true;const go=()=>{const p=v.play();p&&p.catch(()=>{})};go();document.addEventListener('touchstart',go,{once:true,passive:true});}
+ {const v=$('#heroVid');wrapVid(v);v.muted=true;v.dataset.vis='1';const go=()=>{const p=v.play();p&&p.catch(()=>{})};go();v.addEventListener('canplay',go);document.addEventListener('touchstart',go,{once:true,passive:true});}
 
  // Menu
  const hdr=$('#top'),mb=$('#menuBtn');
@@ -601,16 +601,16 @@ video{pointer-events:none}
 
  // Tasting box flavours
  const slices=[
-  ['Vanilla Bean','Moist vanilla sponge layered with vanilla bean buttercream.','91feb05be94f4963a4eda2f427c567a7~mv2.png'],
-  ['Chocolate Fudge','Rich chocolate sponge layered with smooth chocolate buttercream.','27892d2a86864204accf98b9839aed9a~mv2.png'],
-  ['Red Velvet','Soft red velvet sponge layered with cream cheese frosting.','56e7cf23d6674295b4015fd994f26902~mv2.png'],
-  ['Pistachio Praline','Pistachio sponge layered with pistachio cream and crunchy pistachio pieces.','9cc87ea6235745c0868456cbd3e8167c~mv2.png'],
-  ['Lemon Blueberry','Lemon sponge layered with blueberry compote and vanilla buttercream.','46f429c59e044a798637896d9a752356~mv2.png'],
-  ['Tiramisu','Vanilla sponge soaked in espresso, layered with chocolate ganache and mascarpone cream.','002bbc30772f48ab904bfa92cdda22cb~mv2.png'],
-  ['Brown Butter Caramel','Brown butter sponge layered with buttercream and smooth, whipped salted caramel.','bc25d8da64b54d42aaa452c2733da7a5~mv2.png'],
-  ['Biscoff Crunch','Vanilla sponge layered with Biscoff cream and caramelized cookie crunch.','20b64527cc82473eadfa8381e0b003aa~mv2.png']
+  ['Vanilla Bean','Moist vanilla sponge layered with vanilla bean buttercream.','91feb05be94f4963a4eda2f427c567a7~mv2.png','x_218,y_149,w_769,h_769'],
+  ['Chocolate Fudge','Rich chocolate sponge layered with smooth chocolate buttercream.','27892d2a86864204accf98b9839aed9a~mv2.png','x_415,y_148,w_794,h_795'],
+  ['Red Velvet','Soft red velvet sponge layered with cream cheese frosting.','56e7cf23d6674295b4015fd994f26902~mv2.png','x_468,y_288,w_660,h_661'],
+  ['Pistachio Praline','Pistachio sponge layered with pistachio cream and crunchy pistachio pieces.','9cc87ea6235745c0868456cbd3e8167c~mv2.png','x_440,y_247,w_667,h_668'],
+  ['Lemon Blueberry','Lemon sponge layered with blueberry compote and vanilla buttercream.','46f429c59e044a798637896d9a752356~mv2.png','x_444,y_221,w_719,h_719'],
+  ['Tiramisu','Vanilla sponge soaked in espresso, layered with chocolate ganache and mascarpone cream.','002bbc30772f48ab904bfa92cdda22cb~mv2.png','x_519,y_263,w_660,h_660'],
+  ['Brown Butter Caramel','Brown butter sponge layered with buttercream and smooth, whipped salted caramel.','bc25d8da64b54d42aaa452c2733da7a5~mv2.png','x_478,y_242,w_685,h_685'],
+  ['Biscoff Crunch','Vanilla sponge layered with Biscoff cream and caramelized cookie crunch.','20b64527cc82473eadfa8381e0b003aa~mv2.png','x_519,y_288,w_640,h_640']
  ];
- $('#sliceGrid').innerHTML=slices.map(s=>`<div class="slice"><img src="${pic(P+s[2],500,500)}" alt="${esc(s[0])} cake slice" loading="lazy"><h3>${esc(s[0])}</h3><p>${esc(s[1])}</p></div>`).join('');
+ $('#sliceGrid').innerHTML=slices.map(s=>`<div class="slice"><img src="https://static.wixstatic.com/media/${P+s[2]}/v1/crop/${s[3]}/fill/w_500,h_500,al_c,q_85,enc_auto/slice.png" alt="${esc(s[0])} cake slice" loading="lazy"><h3>${esc(s[0])}</h3><p>${esc(s[1])}</p></div>`).join('');
 
  // FAQ (word for word from the current site)
  const faq=[
