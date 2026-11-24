@@ -10,10 +10,10 @@
 <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,400;0,500;1,400;1,500&family=Familjen+Grotesk:wght@400;500&family=Nunito+Sans:wght@300;400&display=swap" rel="stylesheet">
 <style>
 /* Colours and fonts taken from rsweetstudio.com:
-   wine #652031, sand #E7DFD4, cream #FAF7F2.
+   wine #652031, sand #E7DFD4, cream softened to #EFE7DC (was #FAF7F2).
    Headings: Ogg on the current site -> Cormorant Garamond (closest free match).
    Body: Avenir Light -> Nunito Sans Light. Labels: Familjen Grotesk (same as current site). */
-:root{color-scheme:light;--wine:#652031;--sand:#E7DFD4;--cream:#FAF7F2;--line:rgba(101,32,49,.35)}
+:root{color-scheme:light;--wine:#652031;--sand:#E7DFD4;--cream:#EFE7DC;--line:rgba(101,32,49,.35)}
 *{box-sizing:border-box;min-width:0}
 html{scroll-behavior:smooth;scroll-padding-top:70px;-webkit-text-size-adjust:100%}
 body{margin:0;background:var(--sand);color:var(--wine);font:300 16px/1.6 "Nunito Sans",Avenir,"Avenir Next",system-ui,sans-serif;overflow-x:clip}
@@ -154,7 +154,6 @@ textarea{min-height:130px;resize:vertical}
 .avail img{width:100%;height:auto;background:var(--cream)}
 
 /* Tasting */
-.t-banner{width:100%;aspect-ratio:16/7;object-fit:cover;margin:22px 0 30px}
 .slices{display:grid;gap:22px;grid-template-columns:repeat(2,minmax(0,1fr))}
 @media(min-width:860px){.slices{grid-template-columns:repeat(4,minmax(0,1fr))}}
 .slice img{width:100%;aspect-ratio:1;object-fit:cover;margin-bottom:10px}
@@ -184,8 +183,18 @@ footer h2{font:400 clamp(22px,5vw,30px)/1.2 "Familjen Grotesk",sans-serif;letter
 .contacts svg{width:18px;height:18px;flex:none}
 .loc{max-width:900px;margin:22px auto 0;text-align:right;font-size:12px;letter-spacing:.08em;border-top:1px solid rgba(231,223,212,.4);padding-top:10px}
 
+/* Burgundy accents */
+.review{color:var(--wine)}
+.btn.ghost.on-wine{border-color:var(--sand);color:var(--sand)}
+.btn.ghost.on-wine:hover{background:var(--sand);color:var(--wine)}
+#collection .rule{border-top-color:rgba(231,223,212,.4)}
+#collection .tile span{background:var(--sand);color:var(--wine)}
+.wine-panel{background:var(--wine);color:var(--sand);border:0;border-radius:16px;padding:36px 20px 26px}
+.tile span{background:var(--wine);color:var(--sand)}
+.step b{color:var(--wine)}
+.btn.ghost:hover{background:var(--wine);color:var(--sand);opacity:1}
 /* Tasting request */
-.t-req{display:grid;gap:22px;margin-top:36px;padding:clamp(20px,4vw,36px);background:var(--cream);border-radius:16px}
+.t-req{display:grid;gap:22px;margin-top:36px;padding:clamp(20px,4vw,36px);background:var(--cream);border-radius:16px;border-top:6px solid var(--wine)}
 @media(min-width:860px){.t-req{grid-template-columns:1fr 1.3fr}}
 .release{font:500 15px "Familjen Grotesk",sans-serif;letter-spacing:.04em;background:var(--wine);color:var(--sand);display:inline-block;padding:8px 14px;border-radius:999px}
 .t-req.soldout form{opacity:.5;pointer-events:none}
@@ -269,7 +278,7 @@ footer h2{font:400 clamp(22px,5vw,30px)/1.2 "Familjen Grotesk",sans-serif;letter
 </section>
 
 <!-- THE COLLECTION -->
-<section class="band cream" id="collection">
+<section class="band wine" id="collection">
  <div class="wrap center">
   
   <h2>The Collection</h2>
@@ -294,11 +303,11 @@ footer h2{font:400 clamp(22px,5vw,30px)/1.2 "Familjen Grotesk",sans-serif;letter
     </div>
     <div class="flav-img" id="flavImgs" aria-label="Cake photos"></div>
     <p class="note center"><em>Custom flavours and fillings may be available upon request.</em></p>
-    <div class="taste center">
+    <div class="taste center wine-panel">
      <p class="eyebrow">A little taste of everything</p>
      <h2>Can't choose just one?</h2>
      <p class="sub"><em>Discover your favourites with our curated tasting boxes, available on select days.</em></p>
-     <a class="btn" href="#tasting">Explore tasting boxes ↗</a>
+     <a class="btn light" href="#tasting">Explore tasting boxes ↗</a>
      <p class="note">*Signature cake flavours and fillings are subject to an additional charge based on cake size. Please inquire for pricing and disclose any allergies when placing your order.</p>
     </div>
    </div>
@@ -374,8 +383,7 @@ footer h2{font:400 clamp(22px,5vw,30px)/1.2 "Familjen Grotesk",sans-serif;letter
    <p class="sub"><em>A selection of our classic and signature flavours, available to enjoy in one box.</em></p>
    <p class="sub">Released once a month in limited quantities, our tasting boxes are the perfect way to explore our flavours before your next celebration — or simply treat yourself.</p>
   </div>
-  <img class="t-banner" src="https://static.wixstatic.com/media/27eccc_bd2630cea3c449dc90fe9e90344f0550~mv2.png/v1/fill/w_1400,h_612,al_c,q_80/tasting.png" alt="Rows of layered cake slices" loading="lazy">
-  <h2 class="center">The Flavours</h2>
+  <h2 class="center" style="margin-top:28px">The Flavours</h2>
   <div class="slices" id="sliceGrid"></div>
   <div class="little">
    <h3>A Little Note</h3>
@@ -457,7 +465,7 @@ footer h2{font:400 clamp(22px,5vw,30px)/1.2 "Familjen Grotesk",sans-serif;letter
   <div class="center"><h2>Gallery</h2><hr class="rule"></div>
   <div class="gallery" id="galGrid"></div>
   <div class="more"><button class="btn ghost" type="button" id="galMore">Load more</button></div>
-  <div class="more"><a class="btn" href="https://www.instagram.com/rsweetstudio/">Follow @rsweetstudio on Instagram</a></div>
+  <div class="more"><a class="btn" href="https://www.instagram.com/rsweetstudio/">Follow @rsweetstudio</a></div>
  </div>
 </section>
 
