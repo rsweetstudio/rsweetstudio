@@ -188,7 +188,18 @@ footer h2{font:400 clamp(22px,5vw,30px)/1.2 "Familjen Grotesk",sans-serif;letter
 video::-webkit-media-controls,video::-webkit-media-controls-panel,video::-webkit-media-controls-overlay-play-button,
 video::-webkit-media-controls-start-playback-button,video::-webkit-media-controls-play-button,video::-webkit-media-controls-enclosure{display:none!important;-webkit-appearance:none!important;opacity:0!important}
 video{pointer-events:none}
-.edit video{pointer-events:auto}
+/* Poster photo sits on top of each video until it is actually playing,
+   so iPhone's play button can never show (and Low Power Mode shows the photo) */
+.vwrap{position:relative;overflow:hidden}
+.vwrap>video{display:block;opacity:0;transition:opacity .3s}
+.vwrap.on>video{opacity:1}
+.vposter{position:absolute;inset:0;width:100%;height:100%;object-fit:cover;z-index:2;pointer-events:none;transition:opacity .3s}
+.vwrap.on>.vposter{opacity:0}
+.hero-media .vwrap{width:100%;height:100%}
+.edit .vwrap{aspect-ratio:4/5;cursor:zoom-in}
+.edit .vwrap>video{position:absolute;inset:0;height:100%}
+.lb-track .vwrap{display:inline-block}
+.lb-track .vposter{object-fit:contain}
 /* Burgundy accents */
 .review{color:var(--wine)}
 .btn.ghost.on-wine{border-color:var(--sand);color:var(--sand)}
@@ -514,11 +525,14 @@ video{pointer-events:none}
    :`<img src="${pic(s,w,h)}" data-k="${k}" alt="${esc(alt)}" loading="lazy">`;
  // Play videos only while they're on screen (saves data and battery)
  const vio=new IntersectionObserver(es=>es.forEach(e=>{const v=e.target;if(e.isIntersecting){v.muted=true;const p=v.play();p&&p.catch(()=>{})}else v.pause()}),{threshold:.2});
- const watchVideos=root=>root.querySelectorAll('video[data-auto]:not([data-w])').forEach(v=>{v.dataset.w=1;vio.observe(v)});
+ const wrapVid=v=>{if(v.parentNode.classList.contains('vwrap'))return;const w=document.createElement('div');w.className='vwrap';if(v.dataset.k!=null)w.dataset.k=v.dataset.k;
+   v.parentNode.insertBefore(w,v);w.appendChild(v);const im=document.createElement('img');im.className='vposter';im.alt='';im.src=v.getAttribute('poster');w.appendChild(im);
+   v.addEventListener('playing',()=>w.classList.add('on'));v.addEventListener('pause',()=>{if(!v.ended&&v.currentTime===0)w.classList.remove('on')})};
+ const watchVideos=root=>root.querySelectorAll('video[data-auto]:not([data-w])').forEach(v=>{v.dataset.w=1;wrapVid(v);vio.observe(v)});
  const P='27eccc_';
 
  // Hero video
- {const v=$('#heroVid');v.muted=true;const go=()=>{const p=v.play();p&&p.catch(()=>{})};go();document.addEventListener('touchstart',go,{once:true,passive:true});}
+ {const v=$('#heroVid');wrapVid(v);v.muted=true;const go=()=>{const p=v.play();p&&p.catch(()=>{})};go();document.addEventListener('touchstart',go,{once:true,passive:true});}
 
  // Menu
  const hdr=$('#top'),mb=$('#menuBtn');
