@@ -184,6 +184,11 @@ footer h2{font:400 clamp(22px,5vw,30px)/1.2 "Familjen Grotesk",sans-serif;letter
 .contacts svg{width:18px;height:18px;flex:none}
 .loc{max-width:900px;margin:22px auto 0;text-align:right;font-size:12px;letter-spacing:.08em;border-top:1px solid rgba(231,223,212,.4);padding-top:10px}
 
+/* Hide iPhone/Safari play buttons and video controls on the autoplay loops */
+video::-webkit-media-controls,video::-webkit-media-controls-panel,video::-webkit-media-controls-overlay-play-button,
+video::-webkit-media-controls-start-playback-button,video::-webkit-media-controls-play-button,video::-webkit-media-controls-enclosure{display:none!important;-webkit-appearance:none!important;opacity:0!important}
+video{pointer-events:none}
+.edit video{pointer-events:auto}
 /* Burgundy accents */
 .review{color:var(--wine)}
 .btn.ghost.on-wine{border-color:var(--sand);color:var(--sand)}
@@ -256,7 +261,7 @@ footer h2{font:400 clamp(22px,5vw,30px)/1.2 "Familjen Grotesk",sans-serif;letter
 <!-- HOME -->
 <section class="hero" id="home">
  <div class="hero-media">
-  <video id="heroVid" autoplay muted loop playsinline preload="auto"
+  <video id="heroVid" autoplay muted loop playsinline webkit-playsinline disablepictureinpicture disableremoteplayback preload="auto"
    poster="https://static.wixstatic.com/media/27eccc_4ab3c0486c304af89ad15ff3aa7173d9f000.jpg/v1/fill/w_1000,h_800,al_c,q_80/hero.jpg"
    src="https://video.wixstatic.com/video/27eccc_4ab3c0486c304af89ad15ff3aa7173d9/720p/mp4/file.mp4"></video>
  </div>
@@ -505,10 +510,10 @@ footer h2{font:400 clamp(22px,5vw,30px)/1.2 "Familjen Grotesk",sans-serif;letter
  const vidSrc=(s,q)=>`https://video.wixstatic.com/video/27eccc_${s.slice(2).split('/')[0]}/${q}/mp4/file.mp4`;
  const vidPoster=(s,w,h)=>{const [id,suf]=s.slice(2).split('/');return pic(`27eccc_${id}${suf}.jpg`,w,h)};
  const media=(s,w,h,alt,k,q='480p')=>isV(s)
-   ?`<video data-auto data-k="${k}" muted loop playsinline autoplay preload="none" poster="${vidPoster(s,w,h)}" src="${vidSrc(s,q)}" aria-label="${esc(alt)}"></video>`
+   ?`<video data-auto data-k="${k}" muted loop playsinline webkit-playsinline autoplay disablepictureinpicture disableremoteplayback controlslist="nodownload nofullscreen noremoteplayback" preload="metadata" poster="${vidPoster(s,w,h)}" src="${vidSrc(s,q)}" aria-label="${esc(alt)}"></video>`
    :`<img src="${pic(s,w,h)}" data-k="${k}" alt="${esc(alt)}" loading="lazy">`;
  // Play videos only while they're on screen (saves data and battery)
- const vio=new IntersectionObserver(es=>es.forEach(e=>{const v=e.target;if(e.isIntersecting){v.muted=true;if(v.preload==='none')v.preload='auto';const p=v.play();p&&p.catch(()=>{})}else v.pause()}),{threshold:.2});
+ const vio=new IntersectionObserver(es=>es.forEach(e=>{const v=e.target;if(e.isIntersecting){v.muted=true;const p=v.play();p&&p.catch(()=>{})}else v.pause()}),{threshold:.2});
  const watchVideos=root=>root.querySelectorAll('video[data-auto]:not([data-w])').forEach(v=>{v.dataset.w=1;vio.observe(v)});
  const P='27eccc_';
 
@@ -544,7 +549,7 @@ footer h2{font:400 clamp(22px,5vw,30px)/1.2 "Familjen Grotesk",sans-serif;letter
 
  // Lightbox
  const lb=$('#lb'),track=$('#lbTrack');
- const openLB=(title,ids,start=0)=>{$('#lbTitle').textContent=title;track.innerHTML=ids.map(id=>`<figure>${isV(id)?`<video data-auto muted loop playsinline autoplay preload="none" poster="${vidPoster(id,900,1125)}" src="${vidSrc(id,'720p')}"></video>`:`<img src="${full(id)}" alt="${esc(title)}" loading="lazy">`}</figure>`).join('');watchVideos(track);lb.classList.add('on');document.body.style.overflow='hidden';requestAnimationFrame(()=>track.scrollTo({left:start*track.clientWidth}))};
+ const openLB=(title,ids,start=0)=>{$('#lbTitle').textContent=title;track.innerHTML=ids.map(id=>`<figure>${isV(id)?`<video data-auto muted loop playsinline webkit-playsinline autoplay disablepictureinpicture disableremoteplayback controlslist="nodownload nofullscreen noremoteplayback" preload="metadata" poster="${vidPoster(id,900,1125)}" src="${vidSrc(id,'720p')}"></video>`:`<img src="${full(id)}" alt="${esc(title)}" loading="lazy">`}</figure>`).join('');watchVideos(track);lb.classList.add('on');document.body.style.overflow='hidden';requestAnimationFrame(()=>track.scrollTo({left:start*track.clientWidth}))};
  const closeLB=()=>{track.querySelectorAll('video').forEach(v=>v.pause());lb.classList.remove('on');document.body.style.overflow=''};
  $('#lbClose').addEventListener('click',closeLB);
  $('#lbPrev').addEventListener('click',()=>track.scrollBy({left:-track.clientWidth,behavior:'smooth'}));
