@@ -202,6 +202,7 @@ video{pointer-events:none}
 .lb-track .vposter{object-fit:contain}
 .form-msg{margin:0;font-size:15px;min-height:1.2em}
 .form-msg.ok{background:var(--wine);color:var(--sand);padding:14px 16px;border-radius:10px}
+.arr{width:.85em;height:.85em;margin-left:6px;flex:none;vertical-align:-.05em}
 /* Burgundy accents */
 .review{color:var(--wine)}
 .btn.ghost.on-wine{border-color:var(--sand);color:var(--sand)}
@@ -252,7 +253,7 @@ video{pointer-events:none}
 <header id="top">
  <div class="bar">
   <a class="logo" href="#home" aria-label="R Sweet Studio home"><img src="https://static.wixstatic.com/media/27eccc_0404374cc1a449eabb19a57ca05a65cc~mv2.png/v1/fit/w_200,h_200,q_90/logo.png" alt="R Sweet Studio"></a>
-  <a class="btn light head-cta" href="#inquire">Inquire ↗</a>
+  <a class="btn light head-cta" href="#inquire">Inquire<svg class="arr" viewBox="0 0 12 12" aria-hidden="true"><path d="M3 9L9 3M4 3h5v5" fill="none" stroke="currentColor" stroke-width="1.2"/></svg></a>
   <button class="menu-btn" id="menuBtn" aria-label="Open menu" aria-expanded="false" aria-controls="mainNav"><span></span></button>
  </div>
  <nav id="mainNav" aria-label="Main">
@@ -265,7 +266,7 @@ video{pointer-events:none}
    <li><a href="#tasting">Tasting Boxes</a></li>
    <li><a href="#faq">FAQ / Contact Us</a></li>
    <li><a href="#gallery">Gallery</a></li>
-   <li class="mobile-only"><a href="#inquire">Inquire ↗</a></li>
+   <li class="mobile-only"><a href="#inquire">Inquire<svg class="arr" viewBox="0 0 12 12" aria-hidden="true"><path d="M3 9L9 3M4 3h5v5" fill="none" stroke="currentColor" stroke-width="1.2"/></svg></a></li>
   </ul>
  </nav>
 </header>
@@ -326,7 +327,7 @@ video{pointer-events:none}
      <p class="eyebrow">A little taste of everything</p>
      <h2>Can't choose just one?</h2>
      <p class="sub"><em>Discover your favourites with our curated tasting boxes, available on select days.</em></p>
-     <a class="btn light" href="#tasting">Explore tasting boxes ↗</a>
+     <a class="btn light" href="#tasting">Explore tasting boxes<svg class="arr" viewBox="0 0 12 12" aria-hidden="true"><path d="M3 9L9 3M4 3h5v5" fill="none" stroke="currentColor" stroke-width="1.2"/></svg></a>
      <p class="note">*Signature cake flavours and fillings are subject to an additional charge based on cake size. Please inquire for pricing and disclose any allergies when placing your order.</p>
     </div>
    </div>
@@ -389,7 +390,7 @@ video{pointer-events:none}
   </div>
   <div class="center" style="margin-top:22px">
    <p class="sub">See a date marked as fully booked? Reach out anyway! Depending on your request, we may still be able to accommodate you.</p>
-   <a class="btn ghost" href="#inquire">Contact us ↗</a>
+   <a class="btn ghost" href="#inquire">Contact us<svg class="arr" viewBox="0 0 12 12" aria-hidden="true"><path d="M3 9L9 3M4 3h5v5" fill="none" stroke="currentColor" stroke-width="1.2"/></svg></a>
   </div>
  </div>
 </section>
@@ -417,7 +418,7 @@ video{pointer-events:none}
     <p class="sub">Send us a request and we’ll reach out directly to confirm your box and pickup details.</p>
    </div>
    <form class="fs" id="tForm" action="https://formsubmit.co/rsweetstudio@gmail.com" method="POST">
-    <input type="hidden" name="_template" value="table"><input type="hidden" name="_subject" value="New Tasting Box Request">
+    <input type="hidden" name="_template" value="table"><input type="hidden" name="_captcha" value="false"><input type="text" name="_honey" style="display:none" tabindex="-1" autocomplete="off"><input type="hidden" name="_subject" value="New Tasting Box Request">
     <input type="hidden" name="Release Date" id="tReleaseField">
     <div class="two">
      <label>Full Name *<input name="Full Name" autocomplete="name" required></label>
@@ -452,7 +453,7 @@ video{pointer-events:none}
    <h2>Inquiries</h2>
    <p class="sub"><em>For custom orders, weddings, and events.</em></p>
    <form class="fs" id="inqForm" action="https://formsubmit.co/rsweetstudio@gmail.com" method="POST" enctype="multipart/form-data">
-    <input type="hidden" name="_template" value="table"><input type="hidden" name="_subject" id="inqSubject" value="New Inquiry">
+    <input type="hidden" name="_template" value="table"><input type="hidden" name="_captcha" value="false"><input type="text" name="_honey" style="display:none" tabindex="-1" autocomplete="off"><input type="hidden" name="_subject" id="inqSubject" value="New Inquiry">
     <div class="two">
      <label>Full Name *<input name="Full Name" autocomplete="name" required></label>
      <label>Email Address *<input name="email" type="email" autocomplete="email" required></label>
@@ -626,7 +627,7 @@ video{pointer-events:none}
   ['Can I make changes after booking?','We understand that plans can change! Please contact us as soon as possible if you need to make an adjustment. Changes are subject to availability and may affect the final price.'],
   ['What is your cancellation policy?','All deposits are non-refundable, as they secure your date and allow us to begin planning your order. Please contact us directly if your circumstances change.']
  ];
- $('#faqList').innerHTML=faq.map(f=>`<details><summary>${esc(f[0])}</summary><p>${esc(f[1])}</p>${f[2]?`<a href="${esc(f[2][1])}">${esc(f[2][0])} ↗</a>`:''}</details>`).join('');
+ $('#faqList').innerHTML=faq.map(f=>`<details><summary>${esc(f[0])}</summary><p>${esc(f[1])}</p>${f[2]?`<a href="${esc(f[2][1])}">${esc(f[2][0])}<svg class="arr" viewBox="0 0 12 12" aria-hidden="true"><path d="M3 9L9 3M4 3h5v5" fill="none" stroke="currentColor" stroke-width="1.2"/></svg></a>`:''}</details>`).join('');
  $('#faqSearch').addEventListener('input',e=>{const q=e.target.value.trim().toLowerCase();document.querySelectorAll('#faqList details').forEach(d=>{d.hidden=q&&!d.textContent.toLowerCase().includes(q)})});
  document.querySelectorAll('#faqList a[href^="#"]').forEach(a=>a.addEventListener('click',()=>a.closest('details').open=false));
  // ===== AVAILABILITY: edit these dates (format "YYYY-MM-DD") =====
