@@ -435,8 +435,8 @@ video{pointer-events:none}
     <p class="release" id="tRelease"></p>
     <p class="sub">Send us a request and we’ll reach out directly to confirm your box and pickup details.</p>
    </div>
-   <form class="fs" id="tForm" action="https://formsubmit.co/rsweetstudio@gmail.com" method="POST">
-    <input type="hidden" name="_template" value="table"><input type="hidden" name="_captcha" value="false"><input type="text" name="_honey" style="display:none" tabindex="-1" autocomplete="off"><input type="hidden" name="_subject" value="New Tasting Box Request">
+   <form class="fs" id="tForm" method="POST">
+    <input type="checkbox" name="botcheck" style="display:none" tabindex="-1" autocomplete="off"><input type="hidden" name="_subject" value="New Tasting Box Request">
     <input type="hidden" name="Release Date" id="tReleaseField">
     <div class="two">
      <label>Full Name *<input name="Full Name" autocomplete="name" required></label>
@@ -454,6 +454,7 @@ video{pointer-events:none}
     </fieldset>
     <label>Allergies or Notes<textarea name="Allergies or Notes" style="min-height:90px"></textarea></label>
     <button class="btn" type="submit" id="tBtn">Request Tasting Box</button>
+    <p class="form-msg" role="status"></p>
    </form>
   </div>
  </div>
@@ -476,8 +477,8 @@ video{pointer-events:none}
   <div>
    <h2>Inquiries</h2>
    <p class="sub"><em>For custom orders, weddings, and events.</em></p>
-   <form class="fs" id="inqForm" action="https://formsubmit.co/rsweetstudio@gmail.com" method="POST" enctype="multipart/form-data">
-    <input type="hidden" name="_template" value="table"><input type="hidden" name="_captcha" value="false"><input type="text" name="_honey" style="display:none" tabindex="-1" autocomplete="off"><input type="hidden" name="_subject" id="inqSubject" value="New Inquiry">
+   <form class="fs" id="inqForm" method="POST">
+    <input type="checkbox" name="botcheck" style="display:none" tabindex="-1" autocomplete="off"><input type="hidden" name="_subject" id="inqSubject" value="New Inquiry">
     <div class="two">
      <label>Full Name *<input name="Full Name" autocomplete="name" required></label>
      <label>Email Address *<input name="email" type="email" autocomplete="email" required></label>
@@ -495,8 +496,9 @@ video{pointer-events:none}
      <label style="margin-top:14px">Venue/Location<input name="Venue/Location" placeholder="Event venue or city"></label>
     </div>
     <label>Tell Us What You Have in Mind *<textarea name="Tell Us What You Have in Mind" placeholder="Share your ideas, preferred style, flavours, or anything else you'd like us to know." required></textarea></label>
-    <label>Inspiration Photos<input type="file" name="attachment" accept="image/*"></label>
+    <p class="note" style="margin:0">Have inspiration photos? Email them to hello@rsweetstudio.com or DM us on Instagram @rsweetstudio after you send this.</p>
     <button class="btn" type="submit">Send Inquiry</button>
+    <p class="form-msg" role="status"></p>
    </form>
   </div>
  </div>
@@ -735,7 +737,7 @@ video{pointer-events:none}
    $('#flavField').value=on.map(b=>b.value).join(', ');if(on.length===need)$('#flavErr').textContent=''};
   box.addEventListener('change',update);update();
   $('#tForm').addEventListener('submit',e=>{const n=boxes.filter(b=>b.checked).length;
-   if(n!==need){e.preventDefault();$('#flavErr').textContent=`Please choose ${need} flavours (you've chosen ${n}).`;$('#flavErr').scrollIntoView({block:'center',behavior:'smooth'})}});
+   if(n!==need){e.preventDefault();$('#tForm').dataset.blocked='1';$('#flavErr').textContent=`Please choose ${need} flavours (you've chosen ${n}).`;$('#flavErr').scrollIntoView({block:'center',behavior:'smooth'})}});
  }
  // Inquiry form: wedding/event fields
  const isEvent=$('#isEvent'),evf=$('#eventFields');
@@ -743,13 +745,10 @@ video{pointer-events:none}
  isEvent.addEventListener('change',()=>setEvent(isEvent.checked));
  $('#wedBtn').addEventListener('click',()=>setEvent(true));
 
- // ===== Sending forms =====
- // Forms without a photo send instantly in the background (no page change).
- // Forms with a photo shrink the photo on the phone first, then send normally and come back here.
+ // ===== FORMS: paste your Web3Forms access key between the quotes =====
+ const WEB3FORMS_KEY="61beabc9-a6fe-499c-b08c-db871cce7109";
+ // =====================================================================
  {
-  const TO='rsweetstudio@gmail.com';
-  const here=location.origin+location.pathname;
-  const live=location.protocol.startsWith('http');
   const close=()=>{$('#thanks').hidden=true};
   $('#thanksClose').addEventListener('click',close);
   $('#thanks').addEventListener('click',e=>{if(e.target.id==='thanks')close()});
@@ -759,44 +758,35 @@ video{pointer-events:none}
     :'We’ve received your inquiry and will be in touch soon.';
    $('#thanks').hidden=false;$('#thanksClose').focus();
   };
-  const sent=new URLSearchParams(location.search).get('sent');
-  if(sent){showThanks(sent);history.replaceState(null,'',here+(sent==='tasting'?'#tasting':'#inquire'))}
-
-  // Shrink a phone photo (often 3–10 MB) to about 1600px so it uploads in seconds
-  const shrink=file=>new Promise(res=>{
-   if(!file||!/^image\//.test(file.type)||file.size<900000)return res(file);
-   const url=URL.createObjectURL(file),img=new Image();
-   img.onload=()=>{const k=Math.min(1,1600/Math.max(img.width,img.height)),c=document.createElement('canvas');
-    c.width=Math.round(img.width*k);c.height=Math.round(img.height*k);c.getContext('2d').drawImage(img,0,0,c.width,c.height);
-    c.toBlob(b=>{URL.revokeObjectURL(url);res(b&&b.size<file.size?new File([b],file.name.replace(/\.\w+$/,'')+'.jpg',{type:'image/jpeg'}):file)},'image/jpeg',.82)};
-   img.onerror=()=>{URL.revokeObjectURL(url);res(file)};img.src=url;
-  });
+  // Give up after 15 seconds so the button can never get stuck on "Sending…"
+  const post=async(url,body)=>{const c=new AbortController(),t=setTimeout(()=>c.abort(),15000);
+   try{const r=await fetch(url,{method:'POST',signal:c.signal,headers:{'Content-Type':'application/json',Accept:'application/json'},body:JSON.stringify(body)});
+    const j=await r.json().catch(()=>({}));return r.ok&&String(j.success)==='true'}finally{clearTimeout(t)}};
 
   document.querySelectorAll('form.fs').forEach(f=>{
    const kind=f.id==='tForm'?'tasting':'inquiry';
-   const nx=document.createElement('input');nx.type='hidden';nx.name='_next';nx.value=here+'?sent='+kind;
-   if(live)f.appendChild(nx);
    f.addEventListener('submit',async e=>{
-    if(e.defaultPrevented)return;           // e.g. flavours not chosen yet
     e.preventDefault();
-    const btn=f.querySelector('button[type=submit]'),label=btn.textContent;
-    btn.disabled=true;btn.textContent='Sending…';
-    const fileIn=f.querySelector('input[type=file]');
-    if(fileIn&&fileIn.files.length){
-     try{const small=await shrink(fileIn.files[0]);if(small!==fileIn.files[0]){const dt=new DataTransfer();dt.items.add(small);fileIn.files=dt.files}}catch(_){}
-     HTMLFormElement.prototype.submit.call(f);return;
-    }
+    if(f.dataset.blocked==='1'){f.dataset.blocked='';return}   // e.g. flavours not chosen yet
+    const btn=f.querySelector('button[type=submit]'),label=btn.textContent,msg=f.querySelector('.form-msg');
+    btn.disabled=true;btn.textContent='Sending…';msg.className='form-msg';msg.textContent='';
+    const data={};new FormData(f).forEach((v,k)=>{if(typeof v==='string'&&k!=='botcheck')data[k]=v});
+    const bot=!!f.querySelector('[name=botcheck]:checked');
+    let ok=false;
     try{
-     const data={};new FormData(f).forEach((v,k)=>{if(k!=='_next'&&typeof v==='string')data[k]=v});
-     const r=await fetch('https://formsubmit.co/ajax/'+TO,{method:'POST',headers:{'Content-Type':'application/json',Accept:'application/json'},body:JSON.stringify(data)});
-     const j=await r.json().catch(()=>({}));
-     if(!r.ok||String(j.success)!=='true')throw 0;
+     if(bot)ok=true;   // spam bot: pretend it worked
+     else if(WEB3FORMS_KEY){const subject=data._subject;delete data._subject;ok=await post('https://api.web3forms.com/submit',{access_key:WEB3FORMS_KEY,subject,from_name:'rsweetstudio.com',...data})}
+     else ok=await post('https://formsubmit.co/ajax/rsweetstudio@gmail.com',{_captcha:'false',_template:'table',...data});
+    }catch(_){ok=false}
+    btn.disabled=false;btn.textContent=label;
+    if(ok){
      f.reset();if(f.id==='inqForm')setEvent(false);
      f.querySelectorAll('#flavOpts input').forEach(b=>{b.disabled=false;b.parentNode.classList.remove('off')});
      const fc=f.querySelector('#flavCount');if(fc)fc.textContent='0 of 6 chosen';
      showThanks(kind);
-    }catch(_){HTMLFormElement.prototype.submit.call(f);return}   // fall back to the normal way
-    btn.disabled=false;btn.textContent=label;
+    }else{
+     msg.textContent='Sorry, that didn’t go through. Please try again in a minute, or email hello@rsweetstudio.com / DM @rsweetstudio on Instagram.';
+    }
    });
   });
  }
