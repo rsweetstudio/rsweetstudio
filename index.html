@@ -237,12 +237,12 @@ video{pointer-events:none}
 .day.past{opacity:.3}
 .day.available{background:var(--cream);cursor:pointer}
 .day.limited{background:#cdb8a7;cursor:pointer}
-.day.booked,.day.closed{opacity:.4;text-decoration:line-through}
-.day.selected{background:var(--wine);color:var(--cream)}
+.day.booked,.day.closed{background:var(--wine);color:var(--sand);cursor:pointer}
+.day.selected{box-shadow:0 0 0 2px var(--sand),0 0 0 4px var(--wine);font-weight:600}
 .legend{display:flex;flex-wrap:wrap;justify-content:center;gap:8px 18px;margin-top:14px;font-size:13px}
 .legend span{display:inline-flex;align-items:center;gap:6px}
 .dot{width:14px;height:14px;border-radius:50%;display:inline-block;border:1px solid var(--line)}
-.dot.av{background:var(--cream)}.dot.li{background:#cdb8a7}.dot.bk{background:transparent;opacity:.5}
+.dot.av{background:var(--cream)}.dot.li{background:#cdb8a7}.dot.bk{background:var(--wine);border-color:var(--wine)}
 .picked{margin-top:16px;display:flex;flex-wrap:wrap;gap:12px;align-items:center;justify-content:space-between;background:var(--sand);border-radius:14px;padding:14px 16px}
 .picked[hidden]{display:none}
 .picked p{margin:0;font-size:15px}
@@ -644,8 +644,8 @@ video{pointer-events:none}
  document.querySelectorAll('#faqList a[href^="#"]').forEach(a=>a.addEventListener('click',()=>a.closest('details').open=false));
  // ===== AVAILABILITY: edit these dates (format "YYYY-MM-DD") =====
  const CAL={
-  bookedDates:["2026-11-16","2026-11-17","2026-11-18","2026-11-19","2026-11-20","2026-11-21","2026-11-22","2026-11-28","2026-12-18","2026-12-19","2026-12-20","2026-12-21","2026-12-22","2026-12-23","2026-12-24","2026-12-25","2026-12-26"],
-  limitedDates:["2026-11-27","2026-12-05","2026-12-12","2026-12-13","2026-12-17","2026-12-19"], // dates that still have a spot or two
+  bookedDates:["2026-11-16","2026-11-17","2026-11-18","2026-11-19","2026-11-20","2026-11-21","2026-11-22","2026-11-23","2026-11-24","2026-11-25","2026-11-26","2026-11-27","2026-11-28","2026-11-29","2026-11-30","2026-12-18","2026-12-19","2026-12-20","2026-12-21","2026-12-22","2026-12-23","2026-12-24","2026-12-25"],
+  limitedDates:["2026-12-01","2026-12-04","2026-12-05","2026-12-12","2026-12-13","2026-12-17","2026-12-26","2026-12-27","2026-12-31"], // dates that still have a spot or two
   closedWeekdays:[],   // 0=Sun ... 6=Sat
   minNoticeDays:3,     // dates sooner than this show as booked
   monthsAhead:2        // how many months customers can browse
@@ -667,8 +667,8 @@ video{pointer-events:none}
    for(let i=0;i<shown();i++){
     const y=today.getFullYear(),m=today.getMonth()+offset+i,first=new Date(y,m,1),dim=new Date(y,m+1,0).getDate();
     let cells=['S','M','T','W','T','F','S'].map(d=>`<div class="dow">${d}</div>`).join('')+'<div></div>'.repeat(first.getDay());
-    for(let d=1;d<=dim;d++){const dt=new Date(y,m,d),st=status(dt),k=keyOf(dt),ok=st==='available'||st==='limited';
-     cells+=ok?`<button type="button" class="day ${st}${k===sel?' selected':''}" data-k="${k}" data-st="${st}" aria-label="${MONTHS[first.getMonth()]} ${d}, ${st}">${d}</button>`:`<div class="day ${st}" aria-label="${d}, ${st==='past'?'past':'unavailable'}">${d}</div>`}
+    for(let d=1;d<=dim;d++){const dt=new Date(y,m,d),st=status(dt),k=keyOf(dt),ok=st!=='past';
+     cells+=ok?`<button type="button" class="day ${st}${k===sel?' selected':''}" data-k="${k}" data-st="${st}" aria-label="${MONTHS[first.getMonth()]} ${d}, ${st==='booked'?'fully booked':st}">${d}</button>`:`<div class="day ${st}" aria-label="${d}, ${st==='past'?'past':'unavailable'}">${d}</div>`}
     out+=`<div class="month"><h3>${MONTHS[first.getMonth()]} ${first.getFullYear()}</h3><div class="days">${cells}</div></div>`}
    $('#calMonths').innerHTML=out;$('#calPrev').disabled=offset<=0;$('#calNext').disabled=offset>=max};
   $('#calPrev').addEventListener('click',()=>{offset--;render()});
@@ -677,7 +677,9 @@ video{pointer-events:none}
   $('#calMonths').addEventListener('click',e=>{const b=e.target.closest('button.day');if(!b)return;sel=b.dataset.k;
    const [y,m,d]=sel.split('-').map(Number);
    $('#pickedText').textContent=new Date(y,m-1,d).toLocaleDateString('en-CA',{weekday:'long',month:'long',day:'numeric',year:'numeric'});
-   $('#pickedNote').textContent=b.dataset.st==='limited'?'Only a few spots left — book soon!':'This date is available';
+   const full=b.dataset.st==='booked'||b.dataset.st==='closed';
+   $('#pickedNote').textContent=full?'This date is fully booked — reach out anyway! Depending on your request, we may still be able to accommodate you.':b.dataset.st==='limited'?'Only a few spots left — book soon!':'This date is available';
+   $('#pickBtn').textContent=full?'Ask about this date':'Request this date';
    $('#picked').hidden=false;render()});
   $('#pickBtn').addEventListener('click',()=>{if(sel)$('#inqDate').value=sel});
   render();
@@ -686,8 +688,8 @@ video{pointer-events:none}
 
  // ===== TASTING BOXES: edit for each monthly release =====
  const TASTING={
-  releaseDate:"",      // pickup date, e.g. "2026-12-13" — leave "" if not announced yet
-  boxesLeft:null,      // e.g. 12 — set to 0 when sold out, or null to hide the count
+  releaseDate:"2027-01-03", // pickup date, e.g. "2026-12-13" — leave "" if not announced yet
+  boxesLeft:10,        // e.g. 12 — set to 0 when sold out, or null to hide the count
   maxPerRequest:4      // most boxes one person can request
  };
  // ========================================================
